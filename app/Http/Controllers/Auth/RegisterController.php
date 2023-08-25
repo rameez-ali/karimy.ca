@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Customization;
 use App\Http\Controllers\Controller;
 use App\Plan;
+use DB;
+use Session;
 use App\Providers\RouteServiceProvider;
 use App\Role;
 use App\Setting;
@@ -64,26 +66,27 @@ class RegisterController extends Controller
     {
         $settings = app('site_global_settings');
 
-        if($settings->setting_site_recaptcha_sign_up_enable == Setting::SITE_RECAPTCHA_SIGN_UP_ENABLE)
-        {
-            // Start Google reCAPTCHA version 2
-            config_re_captcha($settings->setting_site_recaptcha_site_key, $settings->setting_site_recaptcha_secret_key);
+             return Validator::make($data, [
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                // 'g-recaptcha-response' => 'recaptcha',
+                'password' =>  [
+                    'required',
+                    'string',
+                    'min:12',             // must be at least 10 characters in length
+                    'regex:/[a-z]/',      // must contain at least one lowercase letter
+                    'regex:/[A-Z]/',      // must contain at least one uppercase letter
+                    'regex:/[0-9]/',      // must contain at least one digit
+                    'regex:/[@$!%*#?&]/', // must contain a special character
+                  ],
+            ],
+            [   
+            'password.regex' => 'Note : Your password must be at least 12 characters long and it must contain one upper case alphabet, one lower case alphabet, one number and one special character !',
+            'password.min' => 'Note : Your password must be at least 12 characters long and it must contain one upper case alphabet, one lower case alphabet, one number and one special character !',
 
-            return Validator::make($data, [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-                'g-recaptcha-response' => ['recaptcha'],
-            ]);
-        }
-        else
-        {
-            return Validator::make($data, [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-            ]);
-        }
+            ]
+            );
+        
     }
 
     /**
@@ -237,6 +240,8 @@ class RegisterController extends Controller
 
         $this->validator($request->all())->validate();
 
+
+        // dd($x->passes(), $x->errors());
         /**
          * Use try catch to avoid the 500 internal server error due to the SMTP email
          * may not able to send. The purpose is to improve the user experience.
@@ -249,6 +254,12 @@ class RegisterController extends Controller
         {
             Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
         }
+        
+        DB::table('devices')->insert([
+                    ['user_id' => $user->id,'user_email' => $user->email, 'device_id' => $request->device_id],
+                ]);
+                
+        Session::put('device_id', $request->device_id);
 
         $this->guard()->login($user);
 

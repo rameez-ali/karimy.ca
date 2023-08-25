@@ -65,6 +65,7 @@ class CommentController extends Controller implements CommentControllerInterface
 
         $comment->commentable()->associate($model);
         $comment->comment = $request->message;
+        $comment->createdAt = $request->createdAt;
         //$comment->approved = !Config::get('comments.approval_required');
         $comment->approved = Config::get('comments.approval_required');
         $comment->save();
@@ -84,7 +85,8 @@ class CommentController extends Controller implements CommentControllerInterface
         ])->validate();
 
         $comment->update([
-            'comment' => $request->message
+            'comment' => $request->message,
+            'createdAt' => $request->createdAt
         ]);
 
         return Redirect::to(URL::previous() . '#comment-' . $comment->getKey());
@@ -124,6 +126,7 @@ class CommentController extends Controller implements CommentControllerInterface
         $reply->commentable()->associate($comment->commentable);
         $reply->parent()->associate($comment);
         $reply->comment = $request->message;
+        $reply->createdAt = $request->createdAt;
         $reply->approved = !Config::get('comments.approval_required');
         $reply->save();
 

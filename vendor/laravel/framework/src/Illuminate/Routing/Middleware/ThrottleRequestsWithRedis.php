@@ -52,7 +52,7 @@ class ThrottleRequestsWithRedis extends ThrottleRequests
      *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
-    public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
+    public function handle($request, Closure $next, $maxAttempts = 3, $decayMinutes = 1, $prefix = '')
     {
         $key = $prefix.$this->resolveRequestSignature($request);
 

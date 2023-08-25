@@ -747,7 +747,7 @@
                                                 @if(empty($item->item_image))
                                                     <img id="image_preview" src="{{ asset('backend/images/placeholder/full_item_feature_image.webp') }}" class="img-responsive">
                                                 @else
-                                                    <img id="image_preview" src="{{ Storage::disk('public')->url('item/'. $item->item_image) }}" class="img-responsive">
+                                                    <img id="image_preview" src="{{ url('storage/item/'. $item->item_image) }}" class="img-responsive">
                                                 @endif
                                                 <input id="feature_image" type="hidden" name="feature_image">
                                             </div>
@@ -779,7 +779,7 @@
                                                 <div class="row" id="selected-images">
                                                     @foreach($item->galleries as $key => $gallery)
                                                         <div class="col-3 mb-2" id="item_image_gallery_{{ $gallery->id }}">
-                                                            <img class="item_image_gallery_img" src="{{ Storage::disk('public')->url('item/gallery/'. $gallery->item_image_gallery_name) }}">
+                                                            <img class="item_image_gallery_img" src="{{ url('storage/item/gallery/'. $gallery->item_image_gallery_name) }}">
                                                             <br/><button class="btn btn-danger btn-sm text-white mt-1" onclick="$(this).attr('disabled', true); deleteGallery({{ $gallery->id }});">{{ __('backend.shared.delete') }}</button>
                                                         </div>
                                                     @endforeach

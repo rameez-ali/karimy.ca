@@ -13,6 +13,7 @@ use Nicolaslopezj\Searchable\SearchableTrait;
 use Codebyray\ReviewRateable\Contracts\ReviewRateable;
 use Codebyray\ReviewRateable\Traits\ReviewRateable as ReviewRateableTrait;
 use Spatie\OpeningHours\OpeningHours;
+use App\Comment;
 use DateTime;
 
 class Item extends Model implements ReviewRateable
@@ -155,6 +156,11 @@ class Item extends Model implements ReviewRateable
     {
         return $this->belongsToMany('App\Category', 'category_item')->withTimestamps();
     }
+    
+    public function reviews()
+    {
+        return $this->belongsTo('App\Review');
+    }
 
     public function getAllCategories($limit_rows=0, $parent_category=0)
     {
@@ -291,6 +297,19 @@ class Item extends Model implements ReviewRateable
             ->where('commentable_id', $this->id)
             ->count();
     }
+    
+    /**
+     * Get all of the post's comments.
+     */
+    public function comments()
+    {
+        return $this->hasMany('App\Comment', 'commentable_id', 'id');
+    }
+    
+    public function event_days() 
+    {
+        return $this->hasMany(Event_day::class, 'event_id', 'id');
+    }
 
     /**
      * Get all of users who saved this item
@@ -391,7 +410,7 @@ class Item extends Model implements ReviewRateable
             return DB::table('reviews')
                 ->where('approved', self::ITEM_REVIEW_APPROVED)
                 ->where('reviewrateable_id', $this->id)
-                ->orderBy('updated_at', 'desc')
+                ->orderBy('created_at', 'desc')
                 ->get();
         }
         elseif($sort_by == self::ITEM_RATING_SORT_BY_OLDEST)
@@ -399,7 +418,7 @@ class Item extends Model implements ReviewRateable
             return DB::table('reviews')
                 ->where('approved', self::ITEM_REVIEW_APPROVED)
                 ->where('reviewrateable_id', $this->id)
-                ->orderBy('updated_at', 'asc')
+                ->orderBy('created_at', 'asc')
                 ->get();
         }
         elseif($sort_by == self::ITEM_RATING_SORT_BY_HIGHEST)
@@ -423,7 +442,7 @@ class Item extends Model implements ReviewRateable
             return DB::table('reviews')
                 ->where('approved', self::ITEM_REVIEW_APPROVED)
                 ->where('reviewrateable_id', $this->id)
-                ->orderBy('updated_at', 'desc')
+                ->orderBy('created_at', 'desc')
                 ->get();
         }
 
@@ -590,19 +609,21 @@ class Item extends Model implements ReviewRateable
     public function setApproved()
     {
         $this->item_status = Item::ITEM_PUBLISHED;
-        $this->save();
+        
+        return $this->save();
+        
     }
 
     public function setDisapproved()
     {
         $this->item_status = Item::ITEM_SUBMITTED;
-        $this->save();
+        return $this->save();
     }
 
     public function setSuspended()
     {
         $this->item_status = Item::ITEM_SUSPENDED;
-        $this->save();
+        return $this->save();
     }
 
     public function deleteItemFeatureImage()
@@ -663,10 +684,12 @@ class Item extends Model implements ReviewRateable
         $opening_hour_exceptions_array = array();
 
         $item_hours = $this->itemHours()->get();
+        
         foreach($item_hours as $item_hours_key => $item_hour)
         {
             $item_hour_open_time = substr($item_hour->item_hour_open_time, 0, -3);
             $item_hour_close_time = substr($item_hour->item_hour_close_time, 0, -3);
+            
 
             if($item_hour->item_hour_day_of_week == ItemHour::DAY_OF_WEEK_MONDAY)
             {
@@ -697,7 +720,7 @@ class Item extends Model implements ReviewRateable
                 $opening_hours_array_sunday[] = $item_hour_open_time . "-" . $item_hour_close_time;
             }
         }
-
+        
         $item_hour_exceptions = $this->itemHourExceptions()->get();
         foreach($item_hour_exceptions as $item_hour_exceptions_key => $item_hour_exception)
         {
@@ -714,6 +737,7 @@ class Item extends Model implements ReviewRateable
             }
         }
 
+        
         $opening_hours_obj = OpeningHours::createAndMergeOverlappingRanges([
             'monday' => $opening_hours_array_monday,
             'tuesday' => $opening_hours_array_tuesday,

@@ -110,7 +110,7 @@ trait ThrottlesLogins
      */
     public function maxAttempts()
     {
-        return property_exists($this, 'maxAttempts') ? $this->maxAttempts : 5;
+        return property_exists($this, 'maxAttempts') ? $this->maxAttempts : 3;
     }
 
     /**

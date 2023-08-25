@@ -299,7 +299,6 @@
 
                     <div class="row">
                         <div class="col-12">
-
                             {{ $pagination->links() }}
                         </div>
                     </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\User;
 use App\Item;
 use App\ItemClaim;
 use Artesaos\SEOTools\Facades\SEOMeta;
@@ -295,8 +296,49 @@ class ItemClaimController extends Controller
         }
         else
         {
-            return response()->download(storage_path('app/item_claim_doc/') . $file_name);
+            return response()->download(url('storage/item_claim_doc') . "/".$file_name);
         }
+    }
+    
+    public function sendNotification($user_id, $title, $message)
+    {
+    
+    $device_token = User::where('id',$user_id)->first();
+        
+    $payload = array(
+      'to' => $device_token->device_token,
+      'sound' => 'default',
+      'title'  => $title,
+      'body' => $message,
+      'channelId' => 'default'
+    );
+
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => "https://exp.host/--/api/v2/push/send",
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_SSL_VERIFYHOST =>  0,
+      CURLOPT_SSL_VERIFYHOST =>  0,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => json_encode($payload),
+      CURLOPT_HTTPHEADER => array(
+        "Accept: application/json",
+        "Accept-Encoding: gzip, deflate",
+        "Content-Type: application/json",
+        "cache-control: no-cache",
+        "host: exp.host"
+      ),
+    ));
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+    
     }
 
     public function approveItemClaim(Request $request, ItemClaim $itemClaim)
@@ -325,6 +367,12 @@ class ItemClaimController extends Controller
         $itemClaim->item_claim_reply = $request->item_claim_reply_approve;
         $itemClaim->item_claim_status = ItemClaim::ITEM_CLAIM_STATUS_APPROVED;
         $itemClaim->save();
+        
+         if($itemClaim==true){
+                $pushTitle = "Claim Listing Approved";
+                $pushMessage = $item->item_title. " Has Been Approved";
+                $this->sendNotification($itemClaim->user_id, $pushTitle, $pushMessage);
+            }
 
         \Session::flash('flash_message', __('item_claim.alert.admin-item-claim-approve-success'));
         \Session::flash('flash_type', 'success');
@@ -337,11 +385,19 @@ class ItemClaimController extends Controller
         $request->validate([
             'item_claim_reply_disapprove' => 'nullable|max:65535',
         ]);
+        
+        $item = $itemClaim->item()->first();
 
         // update the item_claim record status to disapprove
         $itemClaim->item_claim_reply = $request->item_claim_reply_disapprove;
         $itemClaim->item_claim_status = ItemClaim::ITEM_CLAIM_STATUS_DISAPPROVED;
         $itemClaim->save();
+        
+        if($itemClaim==true){
+                $pushTitle = "Claim Listing Disapproved";
+                $pushMessage = $item->item_title. " Has Been Disapproved";
+                $this->sendNotification($itemClaim->user_id, $pushTitle, $pushMessage);
+            }
 
         \Session::flash('flash_message', __('item_claim.alert.admin-item-claim-disapprove-success'));
         \Session::flash('flash_type', 'success');

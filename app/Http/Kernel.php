@@ -68,6 +68,8 @@ class Kernel extends HttpKernel
         'locale' => \App\Http\Middleware\InitialLocale::class,
         'global_variables' => \App\Http\Middleware\GlobalVariablesMiddleware::class,
         'maintenance' => \App\Http\Middleware\Maintenance::class,
+        'CheckDeviceStatus' => \App\Http\Middleware\CheckDeviceStatus::class,
+
     ];
 
     /**

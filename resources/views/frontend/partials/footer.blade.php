@@ -492,13 +492,13 @@
             <!--</li>-->
             
             <ul class="list-unstyled footer-nav">
-            <li><a href="https://karimy.hostingladz.com/category/local-services">
+            <li><a href="https://karimy.ca/category/local-services">
                 <span>Local Services</span></a></li>
-            <li><a href="https://karimy.hostingladz.com/category/real-estate">
+            <li><a href="https://karimy.ca/category/real-estate">
             <span>Real Estate</span></a></li>
-            <li><a href="https://karimy.hostingladz.com/category/restaurants"><span>Restaurants</span></a></li>
-            <li><a href="https://karimy.hostingladz.com/category/shopping"><span>Shopping</span></a></li>
-            <li><a href="https://karimy.hostingladz.com/category/health-medical"><span>Health &amp; Medical</span></a></li>
+            <li><a href="https://karimy.ca/category/restaurants"><span>Restaurants</span></a></li>
+            <li><a href="https://karimy.ca/category/shopping"><span>Shopping</span></a></li>
+            <li><a href="https://karimy.ca/category/health-medical"><span>Health &amp; Medical</span></a></li>
             </ul>
         </ul>
     </div>

@@ -21,7 +21,7 @@ class Subscription extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'plan_id', 'subscription_start_date', 'subscription_end_date', 'subscription_max_featured_listing',
+        'user_id', 'plan_id', 'subscription_start_date', 'subscription_end_date', 'trial_taken', 'subscription_max_featured_listing',
         'subscription_paypal_profile_id', 'subscription_razorpay_plan_id', 'subscription_razorpay_subscription_id',
         'subscription_pay_method', 'subscription_stripe_customer_id', 'subscription_stripe_subscription_id',
         'subscription_stripe_future_plan_id',

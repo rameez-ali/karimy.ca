@@ -13,6 +13,7 @@ use App\ItemHour;
 use App\ItemImageGallery;
 use App\ItemLead;
 use App\ItemSection;
+use App\Review;
 use App\Mail\Notification;
 use App\Plan;
 use App\Product;
@@ -31,6 +32,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use App\Device;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -44,6 +46,33 @@ use Spatie\OpeningHours\OpeningHours;
 
 class PagesController extends Controller
 {
+    
+    public function device_authorization(Request $request){
+
+            $user_id = Auth::user()->id;
+            $user_email = Auth::user()->email;
+            
+            $otp = $request->device_verfication_otp1.$request->device_verfication_otp2.$request->device_verfication_otp3.$request->device_verfication_otp4.$request->device_verfication_otp5.$request->device_verfication_otp6;
+            
+            if (DB::table('device_verfication_otp')->where('user_id',$user_id)->where('user_email',$user_email)->where('otp',$otp)->value('id')!=null) {
+                
+                $device = new Device();
+                $devices = $device->device_id = $request->device_id;
+                $devices = $device->user_id = $user_id;
+                $devices = $device->user_email = $user_email;
+                $devices = $device->save();
+            
+                return redirect()->route('page.home');
+            }
+            else{
+                
+                \Session::flash('flash_message', __('Your listing has been submitted for review and it will be post once the admin will approve it'));
+                \Session::flash('flash_type', 'success');
+                return redirect()->route('device_authorization');
+
+            }
+    
+    }
     public function index(Request $request)
     {
         $settings = app('site_global_settings');
@@ -207,9 +236,6 @@ class PagesController extends Controller
         /**
          * End initial blade view file path
          */
-
-    //print_r($theme_view_path);
-    //exit;
     
         return response()->view($theme_view_path . 'index',
             compact('categories', 'paid_items', 'popular_items', 'latest_items',
@@ -1136,7 +1162,6 @@ class PagesController extends Controller
         /**
          * End initial blade view file path
          */
-
         return response()->view($theme_view_path . 'categories',
             compact('categories', 'paid_items', 'free_items', 'pagination', 'all_states',
                 'ads_before_breadcrumb', 'ads_after_breadcrumb', 'ads_before_content', 'ads_after_content',
@@ -3017,9 +3042,15 @@ class PagesController extends Controller
         $item = Item::where('item_slug', $item_slug)
             ->where('item_status', Item::ITEM_PUBLISHED)
             ->first();
-
+        
         if($item)
         {
+            $item_reviews = Review::
+              with('users')
+            ->where('reviewrateable_id', $item->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+            
             $item_user = $item->user()->first();
 
             if($item_user)
@@ -3182,10 +3213,11 @@ class PagesController extends Controller
                         ->with('city')
                         ->with('user')
                         ->take(4)->get();
-
+                        
                     /**
                      * get 4 similar items by current item lat and lng
                      */
+                     
                     $item_category_ids = array();
                     foreach($item_all_categories as $item_all_categories_key => $category)
                     {
@@ -3213,8 +3245,9 @@ class PagesController extends Controller
                      * Start get all item approved reviews
                      */
                     $item_count_rating = $item->getCountRating();
-                    $item_average_rating = $item->item_average_rating;
-
+                    
+                    $item_average_rating = Review::where('reviewrateable_id',$item->id)->where('approved',1)->avg('rating');
+                    
                     $rating_sort_by = empty($request->rating_sort_by) ? Item::ITEM_RATING_SORT_BY_NEWEST : $request->rating_sort_by;
                     $reviews = $item->getApprovedRatingsSortBy($rating_sort_by);
 
@@ -3406,10 +3439,9 @@ class PagesController extends Controller
                     /**
                      * End initial Google reCAPTCHA version 2
                      */
-
                     return response()->view($theme_view_path . 'item',
                         compact('item', 'nearby_items', 'similar_items',
-                            'reviews', 'ads_before_breadcrumb', 'ads_after_breadcrumb', 'ads_before_gallery', 'ads_before_description',
+                            'reviews', 'item_reviews', 'ads_before_breadcrumb', 'ads_after_breadcrumb', 'ads_before_gallery', 'ads_before_description',
                             'ads_before_location', 'ads_before_features', 'ads_before_reviews', 'ads_before_comments',
                             'ads_before_share', 'ads_after_share', 'ads_before_sidebar_content', 'ads_after_sidebar_content',
                             'item_display_categories', 'item_total_categories', 'item_all_categories', 'item_count_rating',
@@ -4616,6 +4648,69 @@ class PagesController extends Controller
         }
     }
 
+    public function faqs(Request $request)
+    {
+        $settings = app('site_global_settings');
+
+        /**
+         * Start SEO
+         */
+        SEOMeta::setTitle(__('seo.frontend.faqs', ['site_name' => empty($settings->setting_site_name) ? config('app.name', 'Laravel') : $settings->setting_site_name]));
+        SEOMeta::setDescription('');
+        SEOMeta::setCanonical(URL::current());
+        SEOMeta::addKeyword($settings->setting_site_seo_home_keywords);
+        /**
+         * End SEO
+         */
+
+        if($settings->setting_page_terms_and_condition_enable == Setting::CONDITION_PAGE_ENABLED)
+        {
+            $faqs = Faq::get();
+
+            /**
+             * Start inner page header customization
+             */
+            $site_innerpage_header_background_type = Customization::where('customization_key', Customization::SITE_INNERPAGE_HEADER_BACKGROUND_TYPE)
+                ->where('theme_id', $settings->setting_site_active_theme_id)->first()->customization_value;
+
+            $site_innerpage_header_background_color = Customization::where('customization_key', Customization::SITE_INNERPAGE_HEADER_BACKGROUND_COLOR)
+                ->where('theme_id', $settings->setting_site_active_theme_id)->first()->customization_value;
+
+            $site_innerpage_header_background_image = Customization::where('customization_key', Customization::SITE_INNERPAGE_HEADER_BACKGROUND_IMAGE)
+                ->where('theme_id', $settings->setting_site_active_theme_id)->first()->customization_value;
+
+            $site_innerpage_header_background_youtube_video = Customization::where('customization_key', Customization::SITE_INNERPAGE_HEADER_BACKGROUND_YOUTUBE_VIDEO)
+                ->where('theme_id', $settings->setting_site_active_theme_id)->first()->customization_value;
+
+            $site_innerpage_header_title_font_color = Customization::where('customization_key', Customization::SITE_INNERPAGE_HEADER_TITLE_FONT_COLOR)
+                ->where('theme_id', $settings->setting_site_active_theme_id)->first()->customization_value;
+
+            $site_innerpage_header_paragraph_font_color = Customization::where('customization_key', Customization::SITE_INNERPAGE_HEADER_PARAGRAPH_FONT_COLOR)
+                ->where('theme_id', $settings->setting_site_active_theme_id)->first()->customization_value;
+            /**
+             * End inner page header customization
+             */
+
+            /**
+             * Start initial blade view file path
+             */
+            $theme_view_path = Theme::find($settings->setting_site_active_theme_id);
+            $theme_view_path = $theme_view_path->getViewPath();
+            /**
+             * End initial blade view file path
+             */
+
+            return response()->view($theme_view_path . 'faqs',
+                compact('faqs', 'site_innerpage_header_background_type', 'site_innerpage_header_background_color',
+                        'site_innerpage_header_background_image', 'site_innerpage_header_background_youtube_video',
+                        'site_innerpage_header_title_font_color', 'site_innerpage_header_paragraph_font_color'));
+        }
+        else
+        {
+            return redirect()->route('page.home');
+        }
+    }
+    
     public function privacyPolicy(Request $request)
     {
         $settings = app('site_global_settings');

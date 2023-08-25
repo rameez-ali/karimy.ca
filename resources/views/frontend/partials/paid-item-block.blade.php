@@ -1,6 +1,6 @@
 <div class="d-block d-md-flex listing vertical listing__item_featured_box">
 
-    <a href="{{ route('page.item', $item->item_slug) }}" class="img d-block" style="background-image: url({{ !empty($item->item_image_medium) ? Storage::disk('public')->url('item/' . $item->item_image_medium) : (!empty($item->item_image) ? Storage::disk('public')->url('item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }})">
+    <a href="{{ route('page.item', $item->item_slug) }}" class="img d-block" style="background-image: url({{ !empty($item->item_image_medium) ? url('storage/item/' . $item->item_image_medium) : (!empty($item->item_image) ? url('storage/item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }})">
         <span class="text-white pl-1 pr-1 pt-1 pb-1 m-0 item-featured-label">{{ __('frontend.item.featured') }}</span>
     </a>
     <div class="lh-content">
@@ -61,7 +61,7 @@
                         @if(empty($item->user->user_image))
                             <img src="{{ asset('frontend/images/placeholder/profile-'. intval($item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
                         @else
-                            <img src="{{ Storage::disk('public')->url('user/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
+                            <img src="{{ url('storage/user/user_image/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
                         @endif
                     </div>
                     <div class="col-9 line-height-1-2 item-box-user-name-div">

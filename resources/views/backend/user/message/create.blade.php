@@ -28,7 +28,7 @@
                     @if(empty($item->item_image))
                         <img id="image_preview" src="{{ asset('backend/images/placeholder/full_item_feature_image.webp') }}" class="img-responsive rounded">
                     @else
-                        <img id="image_preview" src="{{ Storage::disk('public')->url('item/'. $item->item_image) }}" class="img-responsive rounded">
+                        <img id="image_preview" src="{{ url('storage/item/'. $item->item_image) }}" class="img-responsive rounded">
                     @endif
 
                         <a href="{{ route('page.item', $item->item_slug) }}" class="btn btn-primary btn-block mt-2">{{ __('backend.message.view-listing') }}</a>
@@ -75,7 +75,7 @@
 
                             <div class="col-md-12">
                                 <label class="text-black" for="message">{{ __('backend.message.message-txt') }}</label>
-                                <textarea rows="6" id="message" type="text" class="form-control @error('message') is-invalid @enderror" name="message">{{ old('message') }}</textarea>
+                                <textarea rows="6" id="message" type="text" class="form-control @error('message') is-invalid @enderror" name="messfage">{{ old('message') }}</textarea>
                                 @error('message')
                                 <span class="invalid-tooltip">
                                         <strong>{{ $message }}</strong>
@@ -83,6 +83,7 @@
                                 @enderror
                             </div>
                         </div>
+                                <div id="moment"></div>
 
                         <div class="form-row mb-3">
                             <div class="col-md-12">
@@ -108,4 +109,8 @@
 @endsection
 
 @section('scripts')
+ <script type="text/javascript">
+    var cTime = moment().toDate();
+        $("#moment").append('<input type="text" name="mytext[]" value="'cTime'"/>'); //add input box
+</script>
 @endsection

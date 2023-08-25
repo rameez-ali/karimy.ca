@@ -47,7 +47,11 @@
         height: 384px;
     }
 }
-
+@media screen and (max-width:767px){
+    header a.site-menu-toggle.text-black{
+color:white !important
+}
+}
 @media (max-width: 767.98px) {
     .img-mobile {
         top: 28px;

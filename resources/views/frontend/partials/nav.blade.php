@@ -53,7 +53,7 @@
                     <li><a href="{{ route('page.about') }}"  class="{{ (Route::currentRouteName() === "page.about") ? 'active' : 'disable' }}" >{{ __('frontend.header.about') }}</a></li>
                     @endif
                     <li><a href="{{ route('page.blog') }}"  class="{{ (Route::currentRouteName() === "page.blog") ? 'active' : 'disable' }}">{{ __('frontend.header.blog') }}</a></li>
-                    
+                    <li><a href="{{ route('page.faqs') }}"  class="{{ (Route::currentRouteName() === "page.faq") ? 'active' : 'disable' }}">FAQs</a></li>
                      <li><a href="{{ route('page.contact') }}" class="{{ (Route::currentRouteName() === "page.contact") ? 'active' : 'disable' }}">{{ __('frontend.header.contact') }}</a></li>
 
                     @guest

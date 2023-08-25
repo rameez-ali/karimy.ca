@@ -337,7 +337,7 @@ class ItemController extends Controller
         /**
          * Start initial time zone selector
          */
-        $time_zone_identifiers = DateTimeZone::listIdentifiers();
+        $time_zone_identifiers = DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, 'CA');
         /**
          * End initial time zone selector
          */
@@ -384,54 +384,74 @@ class ItemController extends Controller
          * Start check plan quota
          */
         $login_user = Auth::user();
+        
+        //dd(!$login_user->canFeatureItem());
+        
 
-        if($request->item_featured == Item::ITEM_FEATURED)
-        {
-            if(!$login_user->canFeatureItem())
-            {
-                \Session::flash('flash_message', __('alert.item-created-error-quota'));
-                \Session::flash('flash_type', 'danger');
-                return redirect()->back()->withInput($request->input());
-            }
-        }
-        else
-        {
-            if(!$login_user->canFreeItem())
-            {
-                \Session::flash('flash_message', __('theme_directory_hub.plan.alert.free-plan-quota-reached'));
-                \Session::flash('flash_type', 'danger');
-                return redirect()->back()->withInput($request->input());
-            }
-        }
+        // if($request->item_featured == Item::ITEM_FEATURED)
+        // {
+        //     if(!$login_user->canFeatureItem())
+        //     {
+        //         \Session::flash('flash_message', __('alert.item-created-error-quota'));
+        //         \Session::flash('flash_type', 'danger');
+        //         return redirect()->back()->withInput($request->input());
+        //     }
+        // }
+        // else
+        // {
+
+        //     if(!$login_user->canFreeItem())
+        //     {
+        //         \Session::flash('flash_message', __('theme_directory_hub.plan.alert.free-plan-quota-reached'));
+        //         \Session::flash('flash_type', 'danger');
+        //         return redirect()->back()->withInput($request->input());
+        //     }
+        // }
         /**
          * End check plan quota
          */
-
-        // prepare rule for general information
-        $validate_rule = [
-            'category' => 'required',
-            'category.*' => 'numeric',
-            'item_featured' => 'required|numeric',
+         
+         $request->validate([
+            'item_phone' => 'required',
             'item_title' => 'required|max:255',
             'item_description' => 'required',
             'city_id' => 'nullable|numeric',
             'state_id' => 'nullable|numeric',
             'country_id' => 'nullable|numeric',
-            'item_postal_code' => 'nullable|max:255',
-            'item_phone' => 'nullable|max:255',
-            'item_website' => 'nullable|url|max:255',
-            'item_social_facebook' => 'nullable|url|max:255',
-            'item_social_twitter' => 'nullable|url|max:255',
-            'item_social_linkedin' => 'nullable|url|max:255',
-            'item_youtube_id' => 'nullable|max:255',
-            'item_type' => 'required|numeric|in:1,2',
-            'item_hour_time_zone' => 'required|max:255',
-            'item_hour_show_hours' => 'required|numeric|in:1,2',
+            'feature_image' => 'required',
             'terms_condition' => 'required|boolean',
             'authorize_canada' => 'required|boolean',
             'registered_business_canada' => 'required|boolean',
             'above_18' => 'required|boolean',
-        ];
+        ]);
+
+        // prepare rule for general informationitem_phone
+        // $validate_rule = [
+        //     'item_phone' => 'required',
+        //     'category' => 'required',
+        //     'category.*' => 'numeric',
+        //     'item_featured' => 'required|numeric',
+        //     'item_title' => 'required|max:255',
+        //     'item_description' => 'required',
+        //     'feature_image' => 'required',
+        //     'city_id' => 'nullable|numeric',
+        //     'state_id' => 'nullable|numeric',
+        //     'country_id' => 'nullable|numeric',
+        //     'item_postal_code' => 'nullable|max:255',
+        //     'item_phone' => 'nullable|max:255',
+        //     'item_website' => 'nullable|url|max:255',
+        //     'item_social_facebook' => 'nullable|url|max:255',
+        //     'item_social_twitter' => 'nullable|url|max:255',
+        //     'item_social_linkedin' => 'nullable|url|max:255',
+        //     'item_youtube_id' => 'nullable|max:255',
+        //     'item_type' => 'required|numeric|in:1,2',
+        //     'item_hour_time_zone' => 'required|max:255',
+        //     'item_hour_show_hours' => 'required|numeric|in:1,2',
+        //     'terms_condition' => 'required|boolean',
+        //     'authorize_canada' => 'required|boolean',
+        //     'registered_business_canada' => 'required|boolean',
+        //     'above_18' => 'required|boolean',
+        // ];
 
         // validate category_ids
         $select_categories = $request->category;
@@ -461,21 +481,11 @@ class ItemController extends Controller
                 }
             }
 
-            $validate_rule = array_merge($validate_rule, $custom_field_validation);
         }
 
         // validate request
         //$request->validate($validate_rule);
-         $request->validate($validate_rule, [
-        'terms_condition.required' => 'Please accept the terms and conditions!',
-        'terms_condition.boolean' => 'Please accept the terms and conditions!',
-        'authorize_canada.required' => 'Please accept run business authorization of canada!',
-        'authorize_canada.boolean' => 'Please accept run business authorization of canada!',
-        'registered_business_canada.required' => 'Please accept business registered in canada?',
-        'registered_business_canada.boolean' => 'Please accept business registered in canada?',
-        'above_18.required' => 'Please accept you are above 18!',
-        'above_18.boolean' => 'Please accept you are above 18!',
-    ]);
+         
     
         /**
          * Start validate location (city, state, country, lat, lng)
@@ -694,7 +704,7 @@ class ItemController extends Controller
         // start to save custom fields data
         $category_custom_fields = new CustomField();
         $category_custom_fields = $category_custom_fields->getDistinctCustomFieldsByCategories($select_categories);
-
+        
         if($category_custom_fields->count() > 0)
         {
             foreach($category_custom_fields as $category_custom_fields_key => $custom_field)
@@ -921,7 +931,7 @@ class ItemController extends Controller
                 )
             );
 
-              \Session::flash('flash_message', __('alert.item-created'));
+              \Session::flash('flash_message', __('Your listing has been submitted for review and it will be post once the admin will approve it'));
         \Session::flash('flash_type', 'success');
 
         }
@@ -1039,7 +1049,7 @@ class ItemController extends Controller
         /**
          * Start initial time zone selector
          */
-        $time_zone_identifiers = DateTimeZone::listIdentifiers();
+        $time_zone_identifiers = DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, 'CA');
         /**
          * End initial time zone selector
          */
@@ -1562,6 +1572,8 @@ class ItemController extends Controller
          * Start save item hours
          */
         $item_hours = empty($request->item_hours) ? array() : $request->item_hours;
+        
+        dd($item_hours);
 
         foreach($item_hours as $item_hours_key => $item_hour)
         {
@@ -1706,6 +1718,7 @@ class ItemController extends Controller
         $login_user = Auth::user();
 
         $saved_items = $login_user->savedItems()->get();
+    
 
         return response()->view('backend.user.item.saved',
             compact('saved_items'));
@@ -1823,34 +1836,19 @@ class ItemController extends Controller
             {
                 $request->validate([
                     'rating' => 'required|numeric|max:5',
-                    'customer_service_rating' => 'required|numeric|max:5',
-                    'quality_rating' => 'required|numeric|max:5',
-                    'friendly_rating' => 'required|numeric|max:5',
-                    'pricing_rating' => 'required|numeric|max:5',
-                    'title' => 'nullable|max:255',
                     'body' => 'required|max:65535',
                     'recommend' => 'nullable|numeric|max:1',
                 ]);
 
                 $login_user = Auth::user();
-                $rating_title = empty($request->title) ? '' : $request->title;
                 $rating_body = $request->body;
                 $overall_rating = $request->rating;
-                $customer_service_rating = $request->customer_service_rating;
-                $quality_rating = $request->quality_rating;
-                $friendly_rating = $request->friendly_rating;
-                $pricing_rating = $request->pricing_rating;
                 $recommend = $request->recommend == 1 ? Item::ITEM_REVIEW_RECOMMEND_YES : Item::ITEM_REVIEW_RECOMMEND_NO;
                 //$approved = $login_user->isAdmin() ? true : false;
                 $approved = true;
 
                 $new_rating = $item->rating([
-                    'title' => $rating_title,
                     'body' => $rating_body,
-                    'customer_service_rating' => $customer_service_rating,
-                    'quality_rating' => $quality_rating,
-                    'friendly_rating' => $friendly_rating,
-                    'pricing_rating' => $pricing_rating,
                     'rating' => $overall_rating,
                     'recommend' => $recommend,
                     'approved' => $approved, // This is optional and defaults to false
@@ -1969,10 +1967,6 @@ class ItemController extends Controller
             {
                 $request->validate([
                     'rating' => 'required|numeric|max:5',
-                    'customer_service_rating' => 'required|numeric|max:5',
-                    'quality_rating' => 'required|numeric|max:5',
-                    'friendly_rating' => 'required|numeric|max:5',
-                    'pricing_rating' => 'required|numeric|max:5',
                     'title' => 'nullable|max:255',
                     'body' => 'required|max:65535',
                     'recommend' => 'nullable|numeric|max:1',
@@ -1982,23 +1976,13 @@ class ItemController extends Controller
                 $rating_title = empty($request->title) ? '' : $request->title;
                 $rating_body = $request->body;
                 $overall_rating = $request->rating;
-                $customer_service_rating = $request->customer_service_rating;
-                $quality_rating = $request->quality_rating;
-                $friendly_rating = $request->friendly_rating;
-                $pricing_rating = $request->pricing_rating;
                 $recommend = $request->recommend == 1 ? Item::ITEM_REVIEW_RECOMMEND_YES : Item::ITEM_REVIEW_RECOMMEND_NO;
-                $approved = $login_user->isAdmin() ? true : false;
 
                 $updated_rating = $item->updateRating($review, [
                     'title' => $rating_title,
                     'body' => $rating_body,
                     'rating' => $overall_rating,
-                    'customer_service_rating' => $customer_service_rating,
-                    'quality_rating' => $quality_rating,
-                    'friendly_rating' => $friendly_rating,
-                    'pricing_rating' => $pricing_rating,
                     'recommend' => $recommend,
-                    'approved' => $approved, // This is optional and defaults to false
                 ]);
 
                 // start to upload image galleries

@@ -92,17 +92,21 @@
                         <div class="row form-group">
 
                             <div class="col-md-12">
-
-                                <label class="text-black" for="user_prefer_country_id">{{ __('backend.setting.country') }}</label>
-                                <select class="custom-select @error('user_prefer_country_id') is-invalid @enderror" name="user_prefer_country_id">
-
-                                    <option value="">{{ __('prefer_country.select-country') }}</option>
-                                    @foreach($all_countries as $all_countries_key => $country)
-                                        @if($country->country_status == \App\Country::COUNTRY_STATUS_ENABLE)
-                                        <option {{ (old('user_prefer_country_id') ? old('user_prefer_country_id') : $login_user->user_prefer_country_id) == $country->id ? 'selected' : '' }} value="{{ $country->id }}">{{ $country->country_name }}</option>
-                                        @endif
-                                    @endforeach
-
+                                <label class="text-black" for="user_prefer_country_id">State</label>
+                                <select class="custom-select @error('user_prefer_country_id') is-invalid @enderror" name="state">
+                                        <option value="Alberta" {{$login_user->state == "Alberta"  ? 'selected' : ''}}>Alberta</option>
+                                        <option value="British Columbia" {{$login_user->state == "British Columbia"  ? 'selected' : ''}}>British Columbia</option>
+                                        <option value="Manitoba" {{$login_user->state == "Manitoba"  ? 'selected' : ''}}>Manitoba</option>
+                                        <option value="New Brunswick" {{$login_user->state == "New Brunswick"  ? 'selected' : ''}}>New Brunswick</option>
+                                        <option value="Newfoundland and Labrador" {{$login_user->state == "Newfoundland and Labrador"  ? 'selected' : ''}}>Newfoundland and Labrador</option>
+                                        <option value="Nova Scotia" {{$login_user->state == "Nova Scotia"  ? 'selected' : ''}}>Nova Scotia</option>
+                                        <option value="Nunavut" {{$login_user->state == "Nunavut"  ? 'selected' : ''}}>Nunavut</option>
+                                        <option value="Ontario" {{$login_user->state == "Ontario"  ? 'selected' : ''}}>Ontario</option>
+                                        <option value="Prince Edward Island" {{$login_user->state == "Prince Edward Island"  ? 'selected' : ''}}>Prince Edward Island</option>
+                                        <option value="Quebec" {{$login_user->state == "Quebec"  ? 'selected' : ''}}>Quebec</option>
+                                        <option value="Saskatchewan" {{$login_user->state == "Saskatchewan"  ? 'selected' : ''}}>Saskatchewan</option>
+                                        <option value="Yukon" {{$login_user->state == "Yukon"  ? 'selected' : ''}}>Yukon</option>
+                                    </select>
                                 </select>
                                 @error('user_prefer_country_id')
                                 <span class="invalid-tooltip">
@@ -132,7 +136,7 @@
                                         @if(empty($login_user->user_image))
                                             <img id="image_preview" src="{{ asset('backend/images/placeholder/profile-' . intval($login_user->id % 10) . '.webp') }}" class="img-responsive">
                                         @else
-                                            <img id="image_preview" src="{{ Storage::disk('public')->url('user/'. $login_user->user_image) }}" class="img-responsive">
+                                            <img id="image_preview" src="{{ url('storage/user/user_image/'. $login_user->user_image) }}" class="img-responsive">
                                         @endif
                                         <input id="feature_image" type="hidden" name="user_image">
                                     </div>
@@ -191,7 +195,7 @@
                     <div class="row">
                         <div class="col-md-12 text-center">
                             <div class="custom-file">
-                                <input id="upload_image_input" type="file" class="custom-file-input">
+                                <input id="upload_image_input" name="k" type="file" class="custom-file-input">
                                 <label class="custom-file-label" for="upload_image_input">{{ __('backend.user.choose-image') }}</label>
                             </div>
                         </div>

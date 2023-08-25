@@ -20,7 +20,7 @@
 
     <!-- Display on xl -->
     @if(!empty($item->item_image) && !empty($item->item_image_blur))
-        <div class="site-blocks-cover inner-page-cover overlay d-none d-xl-flex" style="background-image: url({{ Storage::disk('public')->url('item/' . $item->item_image_blur) }});">
+        <div class="site-blocks-cover inner-page-cover overlay d-none d-xl-flex" style="background-image: url({{ url('storage/item/' . $item->item_image_blur) }});">
     @else
         <div class="site-blocks-cover inner-page-cover overlay d-none d-xl-flex" style="background-image: url({{ asset('frontend/images/placeholder/full_item_feature_image.webp') }});">
     @endif
@@ -29,9 +29,9 @@
 
                 <div class="col-lg-2 col-md-2" data-aos="fade-up" data-aos-delay="400">
                     @if(!empty($item->item_image_tiny))
-                        <img src="{{ Storage::disk('public')->url('item/' . $item->item_image_tiny) }}" alt="Image" class="img-fluid rounded">
+                        <img src="{{ url('storage/item/' . $item->item_image_tiny) }}" alt="Image" class="img-fluid rounded">
                     @elseif(!empty($item->item_image))
-                        <img src="{{ Storage::disk('public')->url('item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
+                        <img src="{{ url('storage/item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
                     @else
                         <img src="{{ asset('frontend/images/placeholder/full_item_feature_image_tiny.webp') }}" alt="Image" class="img-fluid rounded">
                     @endif
@@ -176,7 +176,7 @@
                     @if(!empty($item->item_image_tiny))
                         <img src="{{ Storage::disk('public')->url('item/' . $item->item_image_tiny) }}" alt="Image" class="img-fluid rounded">
                     @elseif(!empty($item->item_image))
-                        <img src="{{ Storage::disk('public')->url('item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
+                        <img src="{{ url('storage/item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
                     @else
                         <img src="{{ asset('frontend/images/placeholder/full_item_feature_image_tiny.webp') }}" alt="Image" class="img-fluid rounded">
                     @endif
@@ -661,8 +661,8 @@
                                     $item_galleries = $item->galleries()->get();
                                     @endphp
                                     @foreach($item_galleries as $galleries_key => $gallery)
-                                        <a href="{{ Storage::disk('public')->url('item/gallery/' . $gallery->item_image_gallery_name) }}" rel="item-image-gallery-thumb">
-                                            <img alt="Image" src="{{ empty($gallery->item_image_gallery_thumb_name) ? Storage::disk('public')->url('item/gallery/' . $gallery->item_image_gallery_name) : Storage::disk('public')->url('item/gallery/' . $gallery->item_image_gallery_thumb_name) }}"/>
+                                        <a href="{{ url('storage/item/gallery/' . $gallery->item_image_gallery_name) }}" rel="item-image-gallery-thumb">
+                                            <img alt="Image" src="{{ empty($gallery->item_image_gallery_thumb_name) ? url('storage/item/gallery/' . $gallery->item_image_gallery_name) : url('storage/item/gallery/' . $gallery->item_image_gallery_thumb_name) }}"/>
                                         </a>
                                     @endforeach
                                 </div>
@@ -672,7 +672,7 @@
                                     @if(empty($item->item_image))
                                         <img src="{{ asset('frontend/images/placeholder/full_item_feature_image.webp') }}" alt="Image" class="img-fluid rounded">
                                     @else
-                                        <img src="{{ Storage::disk('public')->url('item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
+                                        <img src="{{ url('storage/item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
                                     @endif
                                 </div>
 
@@ -1423,9 +1423,9 @@
                                             <div class="row align-items-center mb-3">
                                                 <div class="col-4">
                                                     @if(empty(\App\User::find($review->author_id)->user_image))
-                                                        <img src="{{ asset('frontend/images/placeholder/profile-'. intval($review->author_id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
+                                                        <img src="{{ url('storage/user/user_image/'. intval($review->author_id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
                                                     @else
-                                                        <img src="{{ Storage::disk('public')->url('user/' . \App\User::find($review->author_id)->user_image) }}" alt="{{ \App\User::find($review->author_id)->name }}" class="img-fluid rounded-circle">
+                                                        <img src="{{ url('storage/user/user_image/' . \App\User::find($review->author_id)->user_image) }}" alt="{{ \App\User::find($review->author_id)->name }}" class="img-fluid rounded-circle">
                                                     @endif
                                                 </div>
                                                 <div class="col-8 pl-0">
@@ -1435,7 +1435,7 @@
 
                                             <div class="row mb-3">
                                                 <div class="col-md-12">
-                                                    <span>{{ __('review.backend.overall-rating') }}</span>
+                                                    <span>Rating</span>
 
                                                     <div class="pl-0 rating_stars rating_stars_{{ $review->id }}" data-id="rating_stars_{{ $review->id }}" data-rating="{{ $review->rating }}"></div>
                                                 </div>
@@ -1456,31 +1456,9 @@
                                         <div class="col-md-8">
 
                                             <div class="row mb-0">
-                                                <div class="col-md-6">
-                                                    <span class="font-size-13">{{ __('review.backend.customer-service') }}</span>
-
-                                                    <div class="pl-0 rating_stars rating_stars_customer_service_{{ $review->id }}" data-id="rating_stars_customer_service_{{ $review->id }}" data-rating="{{ $review->customer_service_rating }}"></div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <span class="font-size-13">{{ __('review.backend.quality') }}</span>
-
-                                                    <div class="pl-0 rating_stars rating_stars_quality_{{ $review->id }}" data-id="rating_stars_quality_{{ $review->id }}" data-rating="{{ $review->quality_rating }}"></div>
-                                                </div>
                                             </div>
 
                                             <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <span class="font-size-13">{{ __('review.backend.friendly') }}</span>
-
-                                                    <div class="pl-0 rating_stars rating_stars_friendly_{{ $review->id }}" data-id="rating_stars_friendly_{{ $review->id }}" data-rating="{{ $review->friendly_rating }}"></div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <span class="font-size-13">{{ __('review.backend.pricing') }}</span>
-
-                                                    <div class="pl-0 rating_stars rating_stars_pricing_{{ $review->id }}" data-id="rating_stars_pricing_{{ $review->id }}" data-rating="{{ $review->pricing_rating }}"></div>
-                                                </div>
                                             </div>
 
                                             @if(!empty($review->title))
@@ -1500,8 +1478,8 @@
                                                 <div class="row mb-1">
                                                     <div class="col-md-12" id="review-image-gallery-{{ $review->id }}">
                                                         @foreach($item->getReviewGalleriesByReviewId($review->id) as $key_1 => $review_image_gallery)
-                                                            <a href="{{ Storage::disk('public')->url('item/review/' . $review_image_gallery->review_image_gallery_name) }}" rel="review-image-gallery-thumb{{ $review->id }}">
-                                                                <img alt="Image" src="{{ Storage::disk('public')->url('item/review/' . $review_image_gallery->review_image_gallery_thumb_name) }}"/>
+                                                            <a href="{{ url('storage/item/review/' . $review_image_gallery->review_image_gallery_name) }}" rel="review-image-gallery-thumb{{ $review->id }}">
+                                                                <img alt="Image" style="width:100px;height:100px;" src="{{ url('storage/item/review/' . $review_image_gallery->review_image_gallery_thumb_name) }}"/>
                                                             </a>
                                                         @endforeach
                                                     </div>
@@ -2267,6 +2245,7 @@
 
                                             <input type="hidden" name="recipient" value="{{ $item->user_id }}">
                                             <input type="hidden" name="item" value="{{ $item->id }}">
+                                            <div class="createdAt"></div>
                                             <div class="form-group">
                                                 <input id="subject" type="text" class="form-control rounded @error('subject') is-invalid @enderror" name="subject" value="{{ old('subject') }}" placeholder="{{ __('backend.message.subject') }}">
                                                 @error('subject')
@@ -2304,10 +2283,10 @@
                         <div class="row align-items-center mb-4">
                             <div class="col-4">
                                 @if(empty($item->user->user_image))
-                                    <img src="{{ asset('frontend/images/placeholder/profile-'. intval($item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
+                                    <img src="{{ url('storage/user/user_image/'. intval($item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
                                 @else
 
-                                    <img src="{{ Storage::disk('public')->url('user/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
+                                    <img src="{{ url('storage/user/user_image/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
                                 @endif
                             </div>
                             <div class="col-8 pl-0">
@@ -2427,9 +2406,9 @@
                                     <div class="row align-items-center item-box-user-div">
                                         <div class="col-3 item-box-user-img-div">
                                             @if(empty($similar_item->user->user_image))
-                                                <img src="{{ asset('frontend/images/placeholder/profile-'. intval($similar_item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
+                                                <img src="{{ url('storage/user/user_image/'. intval($similar_item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
                                             @else
-                                                <img src="{{ Storage::disk('public')->url('user/' . $similar_item->user->user_image) }}" alt="{{ $similar_item->user->name }}" class="img-fluid rounded-circle">
+                                                <img src="{{ url('storage/user/user_image/' . $similar_item->user->user_image) }}" alt="{{ $similar_item->user->name }}" class="img-fluid rounded-circle">
                                             @endif
                                         </div>
                                         <div class="col-9 line-height-1-2 item-box-user-name-div">
@@ -2527,9 +2506,9 @@
                                     <div class="row align-items-center item-box-user-div">
                                         <div class="col-3 item-box-user-img-div">
                                             @if(empty($nearby_item->user->user_image))
-                                                <img src="{{ asset('frontend/images/placeholder/profile-'. intval($nearby_item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
+                                                <img src="{{ asset('storage/user/user_image/'. intval($nearby_item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
                                             @else
-                                                <img src="{{ Storage::disk('public')->url('user/' . $nearby_item->user->user_image) }}" alt="{{ $nearby_item->user->name }}" class="img-fluid rounded-circle">
+                                                <img src="{{ url('storage/user/user_image/' . $nearby_item->user->user_image) }}" alt="{{ $nearby_item->user->name }}" class="img-fluid rounded-circle">
                                             @endif
                                         </div>
                                         <div class="col-9 line-height-1-2 item-box-user-name-div">
@@ -2831,6 +2810,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <img src="https://karimy.ca/laravel_project/public/storage/setting/logo-2022-05-25-628e44c3efdda.png" style="width:250px;margin:auto;padding-top:5px;">
+            <h6 style="text-align:center"><b>Point Your Camera & Write Us A Review On Karimy.ca</b></h6>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-12 text-center">
@@ -2948,11 +2929,9 @@
     </div>
 </div>
 @endif
-
 @endsection
 
 @section('scripts')
-
     @if($item->item_type == \App\Item::ITEM_TYPE_REGULAR && $site_global_settings->setting_site_map == \App\Setting::SITE_MAP_OPEN_STREET_MAP)
     <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="{{ asset('frontend/vendor/leaflet/leaflet.js') }}"></script>
@@ -2963,7 +2942,7 @@
 
     <script src="{{ asset('frontend/vendor/goodshare/goodshare.min.js') }}"></script>
 
-    <script src="{{ asset('frontend/vendor/jquery-qrcode/jquery-qrcode-0.18.0.min.js') }}"></script>
+    <script src="{{ asset('frontend/vendor/jquery-qrcode/jq|') }}"></script>
 
     <script>
         $(document).ready(function(){

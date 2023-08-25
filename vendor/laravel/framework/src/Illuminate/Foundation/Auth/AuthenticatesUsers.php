@@ -2,6 +2,7 @@
 
 namespace Illuminate\Foundation\Auth;
 
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -35,21 +36,39 @@ trait AuthenticatesUsers
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
         // the login attempts for this application. We'll key this by the username and
         // the IP address of the client making these requests into this application.
-        if (method_exists($this, 'hasTooManyLoginAttempts') &&
-            $this->hasTooManyLoginAttempts($request)) {
-            $this->fireLockoutEvent($request);
+        // if (method_exists($this, 'hasTooManyLoginAttempts') &&
+        //     $this->hasTooManyLoginAttempts($request)) {
+        //     $this->fireLockoutEvent($request);
 
-            return $this->sendLockoutResponse($request);
-        }
+        //     return $this->sendLockoutResponse($request);
+        // }
 
         if ($this->attemptLogin($request)) {
+                        
             return $this->sendLoginResponse($request);
         }
 
         // If the login attempt was unsuccessful we will increment the number of attempts
         // to login and redirect the user back to the login form. Of course, when this
         // user surpasses their maximum number of attempts they will get locked out.
-        $this->incrementLoginAttempts($request);
+        //$this->incrementLoginAttempts($request);
+        
+        
+        // $affected = DB::table('users')
+        //       ->where('email', $request->email)
+        //       ->update(['login_attempt' => true]);
+        
+        User::where('email',$request->email)->increment('login_attempt');
+        
+        $attemp_no = User::where('email',$request->email)->value('login_attempt');
+        
+        $account_blocked = User::where('email',$request->email)->value('user_suspended');
+        
+        if($account_blocked == 1 || $attemp_no == 3)
+        {
+            User::where('email', $request->email)->update(['user_suspended' => 1]);
+            return $this->sendBlockedLoginResponse($request);
+        }
 
         return $this->sendFailedLoginResponse($request);
     }
@@ -134,6 +153,21 @@ trait AuthenticatesUsers
     {
         throw ValidationException::withMessages([
             $this->username() => [trans('auth.failed')],
+        ]);
+    }
+    
+    /**
+     * Get the Account Blocked login response instance.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function sendBlockedLoginResponse(Request $request)
+    {
+        throw ValidationException::withMessages([
+            $this->username() => [trans('auth.blocked')],
         ]);
     }
 

@@ -1,0 +1,1 @@
+[07-Dec-2022 10:44:08 UTC] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 1028096 bytes) in /home/karimyca/public_html/laravel_project/vendor/laravel/framework/src/Illuminate/Foundation/Console/RouteCacheCommand.php on line 107

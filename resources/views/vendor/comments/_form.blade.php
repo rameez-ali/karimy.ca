@@ -37,6 +37,8 @@
                     @enderror
                 </div>
             @endif
+            
+            <div class="createdAt"></div>
 
             <div class="form-group">
                 <label for="message">{{ __('frontend.comment.enter-message') }}</label>
@@ -44,10 +46,31 @@
                 <div class="invalid-feedback">
                     Your message is required.
                 </div>
-                <small class="form-text text-muted"><a target="_blank" href="https://help.github.com/articles/basic-writing-and-formatting-syntax">{{ __('frontend.comment.markdown') }}</a> {{ __('frontend.comment.cheatsheet') }}.</small>
             </div>
             <button type="submit" class="btn btn-sm btn-outline-success text-uppercase">{{ __('frontend.comment.submit') }}</button>
         </form>
     </div>
 </div>
 <br />
+
+@section('scripts')
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+
+<script>
+
+function set_time() {
+var dateTime = moment().toDate();
+$(".createdAt").html('<input type="hidden" name="createdAt" value="'+dateTime+'"/>');
+call_time();
+}
+
+function call_time(){
+var refresh=1000; // Refresh rate in milli seconds
+mytime=setTimeout('set_time()',refresh)
+}
+
+call_time()
+</script>
+
+@endsection

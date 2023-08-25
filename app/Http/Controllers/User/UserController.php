@@ -58,14 +58,14 @@ class UserController extends Controller
             'name' => 'required|max:255',
             'email' => 'required|email|max:255',
             'user_prefer_language' => 'nullable|max:5',
-            'user_prefer_country_id' => 'nullable|numeric',
+            'state' => 'nullable',
         ]);
 
         $name = $request->name;
         $email = $request->email;
         $user_about = $request->user_about;
         $user_prefer_language = empty($request->user_prefer_language) ? null : $request->user_prefer_language;
-        $user_prefer_country_id = empty($request->user_prefer_country_id) ? null : $request->user_prefer_country_id;
+        $state = $request->state;
 
         $login_user = Auth::user();
 
@@ -78,14 +78,6 @@ class UserController extends Controller
             $validate_error['email'] = __('prefer_country.error.user-email-exist');
         }
 
-        if(!empty($user_prefer_country_id))
-        {
-            $country_exist = Country::find($user_prefer_country_id);
-            if(!$country_exist)
-            {
-                $validate_error['user_prefer_country_id'] = __('prefer_country.alert.country-not-found');
-            }
-        }
 
         if(count($validate_error) > 0)
         {
@@ -104,13 +96,13 @@ class UserController extends Controller
                 if(!Storage::disk('public')->exists('user')){
                     Storage::disk('public')->makeDirectory('user');
                 }
-                if(Storage::disk('public')->exists('user/' . $login_user->user_image)){
-                    Storage::disk('public')->delete('user/' . $login_user->user_image);
-                }
+                // if(Storage::disk('public')->exists('user/user_image/' . $login_user->user_image)){
+                //     Storage::disk('public')->delete('user/user_image/' . $login_user->user_image);
+                // }
 
                 $new_user_image = Image::make(base64_decode(preg_replace('#^data:image/\w+;base64,#i', '',$user_image)))->stream('jpg', 70);
 
-                Storage::disk('public')->put('user/'.$user_image_name, $new_user_image);
+                Storage::disk('local')->put('user/user_image/'.$user_image_name, $new_user_image);
             }
 
             $login_user->name = $name;
@@ -118,7 +110,7 @@ class UserController extends Controller
             $login_user->user_about = $user_about;
             $login_user->user_image = $user_image_name;
             $login_user->user_prefer_language = $user_prefer_language;
-            $login_user->user_prefer_country_id = $user_prefer_country_id;
+            $login_user->state = $state;
             $login_user->save();
 
             \Session::flash('flash_message', __('alert.user-profile-updated'));

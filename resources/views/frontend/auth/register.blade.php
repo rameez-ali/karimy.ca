@@ -58,7 +58,8 @@
 
                     <form method="POST" action="{{ route('register') }}" class="p-5 bg-white">
                         @csrf
-
+                        
+                        <div id="device_id"></div>
                         <div class="form-group row">
 
                             <div class="col-md-12">
@@ -90,12 +91,16 @@
                             <div class="col-md-12">
                                 <label class="text-black" for="subject">{{ __('auth.password') }}</label>
                                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
-
+                                @if($errors->has('password'))
                                 @error('password')
-                                <span class="invalid-feedback" role="alert">
+                                    <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
+                                @else
+                                <p style="font-size:12px;">Note : Your password must be at least 12 characters long and it must contain one upper case alphabet, one lower case alphabet, one number and one special character !</p>
+                                @endif
+                                
                             </div>
                         </div>
 
@@ -244,5 +249,29 @@
         });
 
     </script>
+    
+    <script>
+
+var rand = function() {
+    return Math.random().toString(36).substr(2); // remove `0.`
+};
+
+    function getMacAddress() {
+            if (localStorage.getItem("did")) {
+                var did = localStorage.getItem("did");
+                $('#device_id').html('<input name="device_id" type="hidden" value="'+did+'">');
+                
+            }
+            else{
+                var a = rand() + rand();
+                localStorage.setItem('did', a);
+                var did = localStorage.getItem("did");
+                $('#device_id').html('<input name="device_id" type="hidden" value="'+did+'">');
+            }
+            
+    }
+    
+    getMacAddress();
+</script>
 
 @endsection

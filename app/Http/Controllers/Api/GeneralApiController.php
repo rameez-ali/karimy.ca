@@ -45,14 +45,18 @@ class GeneralApiController extends Controller
   public function getFaqs()
   {
     // Get all canada states
-    $result = Faq::select('faqs_question', 'faqs_answer')
-      ->orderBy('faqs_order', 'ASC')
+    $results = Faq::
+        orderBy('faqs_order', 'ASC')
       ->get();
-
-    if ($result) {
+      
+    // foreach($results as $result)
+    // {
+    //     $result->faqs_answer = strip_tags($result->faqs_answer);
+    // }
+    
+    if ($results) {
       return response()->json([
-        'result'  => $result,
-        'count'   => count($result),
+        'result'  => $results,
         'message' => 'success',
         'status'  => 1
       ], 200);

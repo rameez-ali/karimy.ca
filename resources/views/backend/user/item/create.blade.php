@@ -697,8 +697,8 @@
                         <!-- End feature image and gallery image -->
                         
                           <!-- Accept Terms Condition -->
-                        <div class="form-row mb-4">
-                        <div class="col-md-5">
+                        <div class="form-row mb-5">
+                        <div class="col-md-6" style="display: flex; align-items: flex-start; gap: 5px;">
                 <input id="terms_condition" value="1" type="checkbox" class="@error('terms_condition') is-invalid @enderror" name="terms_condition">
                                        
                                        <label for="terms_condition" class="text-black"> <a href="{{ route('page.terms-and-condition') }}" target="_blank">{{ __('backend.item.item_terms') }}</a></label>

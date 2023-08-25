@@ -48,12 +48,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'email_verified_at',
+        'email_verification_link',
         'password',
         'role_id',
         'user_image',
         'user_about',
         'user_suspended',
         'user_prefer_language',
+        'state',
     ];
 
     /**
@@ -127,6 +129,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany('App\Item');
     }
+    
+    public function claimitems()
+    {
+        return $this->belongsToMany(Item::class, 'item_claims', 'user_id','item_id');
+    }
 
     public function socialiteAccounts()
     {
@@ -141,6 +148,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany('App\ItemClaim');
     }
+
 
     /**
      * Get the items saved by this user
@@ -166,12 +174,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasPaidSubscription()
     {
-        $today = new DateTime('now');
-        $today = $today->format("Y-m-d");
+        $today = date('Y-m-d H:i:s');
 
         $subscription_exist = Subscription::where('user_id', $this->id)
             ->where('subscription_end_date', '>=', $today)->count();
-
+            
         return $subscription_exist > 0 ? true : false;
     }
 
@@ -457,5 +464,14 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // #14 - delete the user
         $this->delete();
+    }
+    
+   public function plans()
+    {
+        return $this->belongsToMany(
+        Plan::class,
+        'subscriptions',
+        'user_id',
+        'plan_id');
     }
 }

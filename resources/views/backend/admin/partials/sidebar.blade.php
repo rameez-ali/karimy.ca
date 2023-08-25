@@ -117,6 +117,14 @@
             </div>
         </div>
     </li>
+    
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/taxes" >
+            <i class="fas fa-th-large"></i>
+            <span>Tax</span>
+        </a>
+    </li>
 
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse_comment" aria-expanded="true" aria-controls="collapse_comment">

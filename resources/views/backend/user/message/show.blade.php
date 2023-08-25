@@ -1,6 +1,7 @@
 @extends('backend.user.layouts.app')
 
 @section('styles')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
 @endsection
 
 @section('content')
@@ -30,7 +31,7 @@
                     @if(empty($item->item_image))
                         <img id="image_preview" src="{{ asset('backend/images/placeholder/full_item_feature_image.webp') }}" class="img-responsive rounded">
                     @else
-                        <img id="image_preview" src="{{ Storage::disk('public')->url('item/'. $item->item_image) }}" class="img-responsive rounded">
+                        <img id="image_preview" src="{{ url('storage/item/'. $item->item_image) }}" class="img-responsive rounded">
                     @endif
 
                     <a href="{{ route('page.item', $item->item_slug) }}" class="btn btn-primary btn-block mt-2" target="_blank">{{ __('backend.message.view-listing') }}</a>
@@ -76,6 +77,8 @@
                                     @enderror
                                 </div>
                             </div>
+                            
+                            <div id="createdAt"></div>
 
                             <div class="form-row mb-3">
                                 <div class="col-md-12">
@@ -113,4 +116,23 @@
 @endsection
 
 @section('scripts')
+
+<script>
+
+function set_time() {
+var dateTime = moment().toDate();
+$("#createdAt").html('<input type="hidden" name="createdAt" value="'+dateTime+'"/>');
+call_time();
+}
+
+function call_time(){
+var refresh=1000; // Refresh rate in milli seconds
+mytime=setTimeout('set_time()',refresh)
+}
+
+call_time()
+</script>
+
+
+
 @endsection

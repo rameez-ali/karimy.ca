@@ -128,7 +128,7 @@
                                             @if(empty($user->user_image))
                                                 <img id="image_preview" src="{{ asset('backend/images/placeholder/profile-' . intval($user->id % 10) . '.webp') }}" class="img-responsive rounded">
                                             @else
-                                                <img id="image_preview" src="{{ Storage::disk('public')->url('user/'. $user->user_image) }}" class="img-responsive rounded">
+                                                <img id="image_preview" src="{{ url('storage/user/user_image/'. $user->user_image) }}" class="img-responsive rounded" style="width:50px;height:50px;">
                                             @endif
                                         </div>
                                     </td>

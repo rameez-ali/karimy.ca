@@ -23,7 +23,6 @@ class Notification extends Mailable
     public $outroLines;
     public $salutation;
 
-
     /**
      * Create a new message instance.
      *
@@ -38,15 +37,17 @@ class Notification extends Mailable
      * @param array $outro_lines
      * @param string|null $salutation
      */
-    public function __construct(string $subject,
-                                string $to_name=null,
-                                string $greenting=null,
-                                array $intro_lines=[],
-                                string $action_text=null,
-                                $level="success",
-                                string $action_url=null,
-                                array $outro_lines=[],
-                                string $salutation=null)
+    public function __construct(
+        string $subject,
+        string $to_name=null,
+        string $greenting=null,
+        array $intro_lines=[],
+        string $action_text=null,
+        $level="success",
+        string $action_url=null,
+        array $outro_lines=[],
+        string $salutation=null
+    )
     {
         //
         $this->subject = $subject;

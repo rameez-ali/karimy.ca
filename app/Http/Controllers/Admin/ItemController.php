@@ -216,12 +216,14 @@ class ItemController extends Controller
          */
 
         $items_query->distinct('items.id');
+        
 
         /**
          * Start getting query result
          */
         $items_count = $items_query->count();
         $items = $items_query->paginate($filter_count_per_page);
+        
 
         $querystringArray = [
             'search_query' => $search_query,
@@ -279,6 +281,7 @@ class ItemController extends Controller
         /**
          * End sorting the search by relevance
          */
+         
 
         return response()->view('backend.admin.item.index',
             compact('items', 'items_count', 'all_printable_categories', 'filter_categories',
@@ -351,7 +354,8 @@ class ItemController extends Controller
         /**
          * Start initial time zone selector
          */
-        $time_zone_identifiers = DateTimeZone::listIdentifiers();
+         
+        $time_zone_identifiers = DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, 'CA');
         /**
          * End initial time zone selector
          */
@@ -1069,26 +1073,26 @@ class ItemController extends Controller
     {
         $settings = app('site_global_settings');
 
-        // prepare rule for general information
-        $validate_rule = [
-            'item_status' => 'required|numeric',
-            'item_featured' => 'required|numeric',
-            'item_title' => 'required|max:255',
-            'item_description' => 'required',
-            'city_id' => 'nullable|numeric',
-            'state_id' => 'nullable|numeric',
-            'country_id' => 'nullable|numeric',
-            'item_postal_code' => 'nullable|max:255',
-            'item_phone' => 'nullable|max:255',
-            'item_website' => 'nullable|url|max:255',
-            'item_social_facebook' => 'nullable|url|max:255',
-            'item_social_twitter' => 'nullable|url|max:255',
-            'item_social_linkedin' => 'nullable|url|max:255',
-            'item_youtube_id' => 'nullable|max:255',
-            'item_type' => 'required|numeric|in:1,2',
-            'item_hour_time_zone' => 'required|max:255',
-            'item_hour_show_hours' => 'required|numeric|in:1,2',
-        ];
+        // // prepare rule for general information
+        // $validate_rule = [
+        //     'item_status' => 'required|numeric',
+        //     'item_featured' => 'required|numeric',
+        //     'item_title' => 'required|max:255',
+        //     'item_description' => 'required',
+        //     'city_id' => 'nullable|numeric',
+        //     'state_id' => 'nullable|numeric',
+        //     'country_id' => 'nullable|numeric',
+        //     'item_postal_code' => 'nullable|max:255',
+        //     'item_phone' => 'nullable|max:255',
+        //     'item_website' => 'nullable|url|max:255',
+        //     'item_social_facebook' => 'nullable|url|max:255',
+        //     'item_social_twitter' => 'nullable|url|max:255',
+        //     'item_social_linkedin' => 'nullable|url|max:255',
+        //     'item_youtube_id' => 'nullable|max:255',
+        //     'item_type' => 'required|numeric|in:1,2',
+        //     'item_hour_time_zone' => 'required|max:255',
+        //     'item_hour_show_hours' => 'required|numeric|in:1,2',
+        // ];
 
         // prepare validate rule for custom fields
         $select_categories = $item->allCategories()->get();
@@ -1108,11 +1112,11 @@ class ItemController extends Controller
                 }
             }
 
-            $validate_rule = array_merge($validate_rule, $custom_field_validation);
+            // $validate_rule = array_merge($validate_rule, $custom_field_validation);
         }
 
-        // validate request
-        $request->validate($validate_rule);
+        // // validate request
+        // $request->validate($validate_rule);
 
         /**
          * Start validate location (city, state, country, lat, lng)
@@ -1323,7 +1327,7 @@ class ItemController extends Controller
         $item->item_hour_show_hours = $item_hour_show_hours;
 
         $item->save();
-
+        
         // start to save custom fields data
         $item->features()->delete();
 
@@ -1514,7 +1518,6 @@ class ItemController extends Controller
         /**
          * End save item hour exceptions
          */
-
         // success, flash message
         \Session::flash('flash_message', __('alert.item-updated'));
         \Session::flash('flash_type', 'success');
@@ -1537,13 +1540,72 @@ class ItemController extends Controller
 
         return redirect()->route('admin.items.index');
     }
+    
+    public function sendNotification($user_id, $title, $message)
+    {
+    
+    $device_token = User::where('id',$user_id)->first();
+        
+    $payload = array(
+      'to' => $device_token->device_token,
+      'sound' => 'default',
+      'title'  => $title,
+      'body' => $message,
+      'channelId' => 'default'
+    );
 
-    public function approveItem(Item $item)
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => "https://exp.host/--/api/v2/push/send",
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_SSL_VERIFYHOST =>  0,
+      CURLOPT_SSL_VERIFYHOST =>  0,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => json_encode($payload),
+      CURLOPT_HTTPHEADER => array(
+        "Accept: application/json",
+        "Accept-Encoding: gzip, deflate",
+        "Content-Type: application/json",
+        "cache-control: no-cache",
+        "host: exp.host"
+      ),
+    ));
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+    
+    }
+
+    public function approveItem(Item $item, Request $request)
     {
         if(Auth::user()->isAdmin() || Auth::user()->id == $item->user_id)
         {
-            $item->setApproved();
-
+            $status = $item->setApproved();
+            
+            $email_notify_message = [
+            __('email.approved_listing.body.body-1'),
+            __('email.approved_listing.body.body-3')
+            ];
+            
+            if($status==true){
+                $pushTitle = "Business Listing Approved";
+                $pushMessage = $item->item_title. " Has Been Approved";
+                $notification = $this->sendNotification($item->user_id, $pushTitle, $pushMessage);
+                
+                DB::table('notifications')->insert([
+                    'user_id' => $item->user_id,
+                    'title' => $pushTitle,
+                    'message' => $pushMessage,
+                    'createdAt' => $request->createdAt
+                ]);
+            }
+        
             \Session::flash('flash_message', __('alert.item-approved'));
             \Session::flash('flash_type', 'success');
             
@@ -1574,6 +1636,7 @@ class ItemController extends Controller
         $business_listing_user = $item->user_id;
         
          $user_exist = User::find($business_listing_user);
+         
         if($user_exist)
         {
             $email_user = $user_exist;
@@ -1599,8 +1662,10 @@ class ItemController extends Controller
                 )
             );
 
+
         \Session::flash('flash_message', __('alert.item-approved'));
             \Session::flash('flash_type', 'success');
+            
 
         }
         catch (\Exception $e)
@@ -1627,12 +1692,26 @@ class ItemController extends Controller
             return redirect()->route('admin.items.index');
         }
     }
+    
 
-    public function disApproveItem(Item $item)
+    public function disApproveItem(Item $item, Request $request)
     {
         if(Auth::user()->isAdmin() || Auth::user()->id == $item->user_id)
         {
-            $item->setDisapproved();
+            $status = $item->setDisapproved();
+            
+            if($status==true){
+                $pushTitle = "Business Listing Disapproved";
+                $pushMessage = $item->item_title. " Has Been Disapproved";
+                $this->sendNotification($item->user_id, $pushTitle, $pushMessage);
+                
+                DB::table('notifications')->insert([
+                    'user_id' => $item->user_id,
+                    'title' => $pushTitle,
+                    'message' => $pushMessage,
+                    'createdAt' => $request->createdAt
+                ]);
+            }
 
             \Session::flash('flash_message', __('alert.item-disapproved'));
             \Session::flash('flash_type', 'success');
@@ -1727,7 +1806,20 @@ class ItemController extends Controller
     {
         if(Auth::user()->isAdmin() || Auth::user()->id == $item->user_id)
         {
-            $item->setSuspended();
+            $status = $item->setSuspended();
+            
+            if($status==true){
+                $pushTitle = "Business Listing Suspended";
+                $pushMessage = $item->item_title. " Has Been Suspended";
+                $this->sendNotification($item->user_id, $pushTitle, $pushMessage);
+                
+                DB::table('notifications')->insert([
+                    'user_id' => $item->user_id,
+                    'title' => $pushTitle,
+                    'message' => $pushMessage,
+                    'createdAt' => $item->createdAt,
+                ]);
+            }
 
             \Session::flash('flash_message', __('alert.item-suspended'));
             \Session::flash('flash_type', 'success');
@@ -1873,33 +1965,18 @@ class ItemController extends Controller
             {
                 $request->validate([
                     'rating' => 'required|numeric|max:5',
-                    'customer_service_rating' => 'required|numeric|max:5',
-                    'quality_rating' => 'required|numeric|max:5',
-                    'friendly_rating' => 'required|numeric|max:5',
-                    'pricing_rating' => 'required|numeric|max:5',
-                    'title' => 'nullable|max:255',
                     'body' => 'required|max:65535',
                     'recommend' => 'nullable|numeric|max:1',
                 ]);
 
                 $login_user = Auth::user();
-                $rating_title = empty($request->title) ? '' : $request->title;
                 $rating_body = $request->body;
                 $overall_rating = $request->rating;
-                $customer_service_rating = $request->customer_service_rating;
-                $quality_rating = $request->quality_rating;
-                $friendly_rating = $request->friendly_rating;
-                $pricing_rating = $request->pricing_rating;
                 $recommend = $request->recommend == 1 ? Item::ITEM_REVIEW_RECOMMEND_YES : Item::ITEM_REVIEW_RECOMMEND_NO;
                 $approved = $login_user->isAdmin() ? true : false;
 
                 $new_rating = $item->rating([
-                    'title' => $rating_title,
                     'body' => $rating_body,
-                    'customer_service_rating' => $customer_service_rating,
-                    'quality_rating' => $quality_rating,
-                    'friendly_rating' => $friendly_rating,
-                    'pricing_rating' => $pricing_rating,
                     'rating' => $overall_rating,
                     'recommend' => $recommend,
                     'approved' => $approved, // This is optional and defaults to false
@@ -2021,34 +2098,19 @@ class ItemController extends Controller
             {
                 $request->validate([
                     'rating' => 'required|numeric|max:5',
-                    'customer_service_rating' => 'required|numeric|max:5',
-                    'quality_rating' => 'required|numeric|max:5',
-                    'friendly_rating' => 'required|numeric|max:5',
-                    'pricing_rating' => 'required|numeric|max:5',
-                    'title' => 'nullable|max:255',
                     'body' => 'required|max:65535',
                     'recommend' => 'nullable|numeric|max:1',
                 ]);
 
                 $login_user = Auth::user();
-                $rating_title = empty($request->title) ? '' : $request->title;
                 $rating_body = $request->body;
                 $overall_rating = $request->rating;
-                $customer_service_rating = $request->customer_service_rating;
-                $quality_rating = $request->quality_rating;
-                $friendly_rating = $request->friendly_rating;
-                $pricing_rating = $request->pricing_rating;
                 $recommend = $request->recommend == 1 ? Item::ITEM_REVIEW_RECOMMEND_YES : Item::ITEM_REVIEW_RECOMMEND_NO;
                 $approved = $login_user->isAdmin() ? true : false;
 
                 $updated_rating = $item->updateRating($review, [
-                    'title' => $rating_title,
                     'body' => $rating_body,
                     'rating' => $overall_rating,
-                    'customer_service_rating' => $customer_service_rating,
-                    'quality_rating' => $quality_rating,
-                    'friendly_rating' => $friendly_rating,
-                    'pricing_rating' => $pricing_rating,
                     'recommend' => $recommend,
                     'approved' => $approved, // This is optional and defaults to false
                 ]);

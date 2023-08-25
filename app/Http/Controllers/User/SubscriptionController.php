@@ -4,6 +4,8 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Plan;
+use App\User;
+use App\Tax;
 use App\Setting;
 use App\SettingBankTransfer;
 use App\Subscription;
@@ -116,9 +118,21 @@ class SubscriptionController extends Controller
 
         $all_setting_bank_transfers = SettingBankTransfer::where('setting_bank_transfer_status', Setting::SITE_PAYMENT_BANK_TRANSFER_ENABLE)->get();
         $setting_site_bank_transfer_enable = $all_setting_bank_transfers->count() > 0 ? true : false;
-
+        
+        $login_user = Auth::user();
+        $user_state_name = User::where('id',$login_user->id)->value('state');
+        $tax = Tax::where('city_name',$user_state_name)->first();
+        
+        if($tax != null){
+            $total_tax = $tax->pst + $tax->gst + $tax->hst;
+            $tax_percentage = number_format($total_tax, 2, '.', '');
+        }
+        else{
+            $tax_percentage = 5;
+        }
+        
         return response()->view('backend.user.subscription.edit',
-            compact('subscription', 'all_plans', 'setting_site_paypal_enable', 'setting_site_razorpay_enable',
+            compact('subscription','tax_percentage', 'all_plans', 'setting_site_paypal_enable', 'setting_site_razorpay_enable',
                     'setting_site_stripe_enable', 'all_setting_bank_transfers', 'setting_site_bank_transfer_enable',
                     'setting_site_payumoney_enable'));
     }

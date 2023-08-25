@@ -369,7 +369,7 @@ class Thread extends Eloquent
             ->join($participantsTable, $usersTable . '.' . $userPrimaryKey, '=', $participantsTable . '.user_id')
             ->where($participantsTable . '.thread_id', $this->id)
             ->select($this->getConnection()->raw($selectString));
-
+            
         if ($userId !== null) {
             $participantNames->where($usersTable . '.' . $userPrimaryKey, '!=', $userId);
         }

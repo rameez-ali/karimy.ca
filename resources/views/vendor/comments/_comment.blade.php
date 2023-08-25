@@ -11,9 +11,9 @@
 @endif
 
           @if($comment->commenter->user_image)
-              <img class="mr-3 rounded-circle" src="{{ Storage::disk('public')->url('user/'. $comment->commenter->user_image) }}" alt="{{ $comment->commenter->name ?? $comment->guest_name }} Avatar" width="64">
+              <img class="mr-3 rounded-circle" src="{{ url('storage/user/user_image/' . $comment->commenter->user_image) }}" alt="{{ $comment->commenter->name ?? $comment->guest_name }} Avatar" width="64">
           @else
-              <img class="mr-3 rounded-circle" src="{{ asset('frontend/images/placeholder/profile-' . intval($comment->commenter->id % 10) . '.webp') }}" alt="{{ $comment->commenter->name ?? $comment->guest_name }} Avatar" width="64">
+              <img class="mr-3 rounded-circle" src="{{ url('storage/user/user_image/' . $comment->commenter->user_image) }}" alt="{{ $comment->commenter->name ?? $comment->guest_name }} Avatar" width="64">
           @endif
 
 
@@ -54,9 +54,11 @@
                                 <div class="form-group">
                                     <label for="message">{{ __('frontend.comment.update-message') }}</label>
                                     <textarea required class="form-control" name="message" rows="3">{{ $comment->comment }}</textarea>
-                                    <small class="form-text text-muted"><a target="_blank" href="https://help.github.com/articles/basic-writing-and-formatting-syntax">{{ __('frontend.comment.markdown') }}</a> {{ __('frontend.comment.cheatsheet') }}.</small>
                                 </div>
                             </div>
+                            
+                            <div class="createdAt"></div>
+
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-sm btn-outline-secondary text-uppercase" data-dismiss="modal">{{ __('frontend.comment.cancel') }}</button>
                                 <button type="submit" class="btn btn-sm btn-outline-success text-uppercase">{{ __('frontend.comment.update') }}</button>
@@ -83,9 +85,11 @@
                                 <div class="form-group">
                                     <label for="message">{{ __('frontend.comment.enter-message') }}</label>
                                     <textarea required class="form-control" name="message" rows="3"></textarea>
-                                    <small class="form-text text-muted"><a target="_blank" href="https://help.github.com/articles/basic-writing-and-formatting-syntax">{{ __('frontend.comment.markdown') }}</a> {{ __('frontend.comment.cheatsheet') }}.</small>
                                 </div>
                             </div>
+                            
+                            <div class="createdAt"></div>
+
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-sm btn-outline-secondary text-uppercase" data-dismiss="modal">{{ __('frontend.comment.cancel') }}</button>
                                 <button type="submit" class="btn btn-sm btn-outline-success text-uppercase">{{ __('frontend.comment.reply') }}</button>
@@ -115,3 +119,22 @@
 @else
   </li>
 @endif
+
+@section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+<script>
+
+function set_time() {
+var dateTime = moment().toDate();
+$(".createdAt").html('<input type="hidden" name="createdAt" value="'+dateTime+'"/>');
+call_time();
+}
+
+function call_time(){
+var refresh=1000; // Refresh rate in milli seconds
+mytime=setTimeout('set_time()',refresh)
+}
+
+call_time()
+</script>
+@endsection

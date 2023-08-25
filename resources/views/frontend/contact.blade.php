@@ -191,7 +191,7 @@
 
                             <div class="collapse" id="collapse-{{ $faq->id }}">
                                 <div class="pt-2">
-                                    <p class="mb-0">{{ $faq->faqs_answer }}</p>
+                                    <p class="mb-0">{!! $faq->faqs_answer !!}</p>
                                 </div>
                             </div>
                         </div>

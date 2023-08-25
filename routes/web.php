@@ -16,6 +16,9 @@
  */
 Route::get('/utils/link', 'UtilsController@makeSymlinks')->name('utils.link');
 Route::get('/utils/cache', 'UtilsController@makeCache')->name('utils.cache');
+
+Route::get('/device_authorization', 'Auth\LoginController@device_authorization_view')->name('device_authorization');
+    Route::post('/device_authorization_added', 'PagesController@device_authorization')->name('device_authorization_added');
 /**
  * End utils routes
  */
@@ -33,7 +36,12 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
     /**
      * Social login routes
      */
+     
 
+
+    Route::middleware(['CheckDeviceStatus'])->group(function () {
+
+    
     // facebook
     Route::get('/auth/facebook', 'Auth\LoginController@redirectToFacebook')->name('auth.login.facebook');
     Route::get('/auth/facebook/callback', 'Auth\LoginController@handleFacebookCallback')->name('auth.login.facebook.callback');
@@ -58,8 +66,6 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
      * Public routes
      */
     Route::get('/', 'PagesController@index')->name('page.home');
-    
-   
 
     Route::get('/search', 'PagesController@search')->name('page.search');
 
@@ -78,6 +84,9 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
 
     Route::get('/listing/{item_slug}', 'PagesController@item')->name('page.item');
     Route::get('/listing/{item_slug}/product/{product_slug}', 'PagesController@product')->name('page.product');
+    
+        
+    });
 
     Route::middleware(['auth'])->group(function () {
 
@@ -91,9 +100,12 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
     Route::get('/pricing', 'PagesController@pricing')->name('page.pricing');
     Route::get('/terms-of-service', 'PagesController@termsOfService')->name('page.terms-of-service');
     
-     Route::get('/terms-and-condition', 'PagesController@termsAndCondition')->name('page.terms-and-condition');
+    Route::get('/terms-and-condition', 'PagesController@termsAndCondition')->name('page.terms-and-condition');
      
     Route::get('/privacy-policy', 'PagesController@privacyPolicy')->name('page.privacy-policy');
+    
+    Route::get('/faqs', 'PagesController@faqs')->name('page.faqs');
+
 
     /**
      * Blog routes
@@ -195,6 +207,7 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
         Route::resource('/states', 'StateController');
         Route::resource('/cities', 'CityController');
         Route::resource('/categories', 'CategoryController');
+        
         Route::resource('/custom-fields', 'CustomFieldController');
         Route::resource('/items', 'ItemController');
         
@@ -209,6 +222,10 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
         Route::get('/items/{item}/sections/{item_section}/edit', 'ItemController@editItemSection')->name('items.sections.edit');
         Route::put('/items/{item}/sections/{item_section}/update', 'ItemController@updateItemSection')->name('items.sections.update');
         Route::delete('/items/{item}/sections/{item_section}/destroy', 'ItemController@destroyItemSection')->name('items.sections.destroy');
+        
+        Route::get('/taxes', 'TaxController@index')->name('tax.index');
+        Route::get('/tax/edit/{id}', 'TaxController@edit')->name('tax.edit');
+        Route::put('/tax/update/{id}', 'TaxController@update')->name('tax.update');
 
         Route::put('/items/{item}/sections/{item_section}/rank-up', 'ItemController@rankUpItemSection')->name('items.sections.rank.up');
         Route::put('/items/{item}/sections/{item_section}/rank-down', 'ItemController@rankDownItemSection')->name('items.sections.rank.down');
@@ -547,6 +564,7 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
         Route::resource('/attributes', 'AttributeController');
 
         Route::get('/comments', 'CommentController@index')->name('comments.index');
+        Route::get('/comments/store', 'CommentController@store')->name('user.comments.store');
 
         /**
          * Start Payment Gateway Routes
@@ -574,7 +592,7 @@ Route::middleware(['installed','demo','global_variables','maintenance'])->group(
 
         // Stripe payment gateway
         Route::post('/stripe/checkout/plan/{plan_id}/subscription/{subscription_id}', 'StripeController@doCheckout')->name('stripe.checkout.do');
-        Route::get('/stripe/checkout/success/plan/{plan_id}/subscription/{subscription_id}', 'StripeController@showCheckoutSuccess')->name('stripe.checkout.success');
+        Route::get('/stripe/checkout/success/plan/{plan_id}/subscription/{subscription_id}/subscription_stripe_customer_id/{subscription_stripe_customer_id}', 'StripeController@showCheckoutSuccess')->name('stripe.checkout.success');
         Route::get('/stripe/checkout/cancel', 'StripeController@cancelCheckout')->name('stripe.checkout.cancel');
         Route::post('/stripe/recurring/cancel', 'StripeController@cancelRecurring')->name('stripe.recurring.cancel');
 

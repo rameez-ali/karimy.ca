@@ -63,9 +63,9 @@
                                                 <div class="row">
                                                     <div class="col-12 col-md-3">
                                                         @if(!empty($item->item_image_tiny))
-                                                            <img src="{{ Storage::disk('public')->url('item/' . $item->item_image_tiny) }}" alt="Image" class="img-fluid rounded">
+                                                            <img src="{{ url('storage/item/' . $item->item_image_tiny) }}" alt="Image" class="img-fluid rounded">
                                                         @elseif(!empty($item->item_image))
-                                                            <img src="{{ Storage::disk('public')->url('item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
+                                                            <img src="{{ url('storage/item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
                                                         @else
                                                             <img src="{{ asset('backend/images/placeholder/full_item_feature_image_tiny.webp') }}" alt="Image" class="img-fluid rounded">
                                                         @endif
@@ -105,7 +105,7 @@
                                                                     @if(empty($item->user->user_image))
                                                                         <img id="image_preview" src="{{ asset('backend/images/placeholder/profile-' . intval($item->user->id % 10) . '.webp') }}" class="img-fluid rounded-circle">
                                                                     @else
-                                                                        <img id="image_preview" src="{{ Storage::disk('public')->url('user/'. $item->user->user_image) }}" class="img-fluid rounded-circle">
+                                                                        <img id="image_preview" src="{{ url('storage/user/user_image/'. $item->user->user_image) }}" class="img-fluid rounded-circle">
                                                                     @endif
                                                                 </div>
                                                                 <div class="col-9 col-sm-10 col-md-9 col-lg-10 col-xl-11">

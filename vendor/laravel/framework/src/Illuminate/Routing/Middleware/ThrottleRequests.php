@@ -44,7 +44,7 @@ class ThrottleRequests
      *
      * @throws \Illuminate\Http\Exceptions\ThrottleRequestsException
      */
-    public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
+    public function handle($request, Closure $next, $maxAttempts = 3, $decayMinutes = 1, $prefix = '')
     {
         $key = $prefix.$this->resolveRequestSignature($request);
 

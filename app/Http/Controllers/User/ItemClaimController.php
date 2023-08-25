@@ -67,6 +67,7 @@ class ItemClaimController extends Controller
             $all_item_claims = ItemClaim::where('user_id', $login_user->id)
                 ->get();
         }
+        
 
         return response()->view('backend.user.item.item-claim.index',
             compact('all_item_claims', 'item_claim_status'));

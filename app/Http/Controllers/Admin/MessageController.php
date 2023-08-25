@@ -121,6 +121,7 @@ class MessageController extends Controller
         $message = $request->message;
         $recipient_user_id = $request->recipient;
         $item_id = $request->item;
+        $createdAt = $request->createdAt;
 
         $recipient_user_id_exist = User::find($recipient_user_id);
         if(empty($recipient_user_id_exist))
@@ -156,6 +157,7 @@ class MessageController extends Controller
             'thread_id' => $thread->id,
             'user_id' => Auth::user()->id,
             'body' => $message,
+            'createdAt' => $createdAt,
         ]);
 
         // Sender
@@ -249,6 +251,7 @@ class MessageController extends Controller
 
         $thread = Thread::findOrFail($thread_id);
         $message = $request->message;
+        $createdAt = $request->createdAt;
         $login_user = Auth::user();
 
         if(!$thread->hasParticipant($login_user->id))
@@ -264,6 +267,7 @@ class MessageController extends Controller
             'thread_id' => $thread->id,
             'user_id' => $login_user->id,
             'body' => $message,
+            'createdAt' => $createdAt,
         ]);
 
         // Add replier as a participant

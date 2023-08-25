@@ -1,6 +1,7 @@
 @extends('backend.admin.layouts.app')
 
 @section('styles')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
 @endsection
 
 @section('content')
@@ -76,6 +77,8 @@
                                     @enderror
                                 </div>
                             </div>
+                            
+                            <div id="comment_createdAt"></div>
 
                             <div class="form-row mb-3">
                                 <div class="col-md-12">
@@ -113,4 +116,10 @@
 @endsection
 
 @section('scripts')
+
+<script type="text/javascript">
+    var cTime = moment().toDate();
+    $("#comment_createdAt").html('<input type="hidden" name="createdAt" value="'+cTime+'"/>'); //add input box
+</script>
+
 @endsection

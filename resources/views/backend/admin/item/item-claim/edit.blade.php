@@ -28,7 +28,7 @@
                     @if(empty($item->item_image))
                         <img id="image_preview" src="{{ asset('backend/images/placeholder/full_item_feature_image.webp') }}" class="img-responsive rounded">
                     @else
-                        <img id="image_preview" src="{{ Storage::disk('public')->url('item/'. $item->item_image) }}" class="img-responsive rounded">
+                        <img id="image_preview" src="{{ url('storage/item/'. $item->item_image) }}" class="img-responsive rounded">
                     @endif
 
                         <a target="_blank" href="{{ route('page.item', $item->item_slug) }}" class="btn btn-primary btn-block mt-2">{{ __('backend.message.view-listing') }}</a>
@@ -109,13 +109,14 @@
                             <div class="col-md-12">
                                 <span class="text-gray-800">{{ __('item_claim.document-uploaded') }}:</span>
                                 {{ $item_claim->item_claim_additional_upload }}
-                                <button id="item_claim_additional_upload_download" class="btn btn-primary btn-sm">{{ __('item_claim.download') }}</button>
-                                <form id="item_claim_additional_upload_download_form" action="{{ route('admin.item-claims.download.do', ['item_claim' => $item_claim]) }}" method="POST" target="_blank">
-                                    @csrf
-                                </form>
+                                <a class="btn btn-primary btn-sm" href="./../../../storage/item_claim_doc/{{$item_claim->item_claim_additional_upload}}" download>Download</a>
                             </div>
                         </div>
                     @endif
+                    <div class="row mb-2">
+                        <div class="col-md-12">
+                        </div>
+                    </div>
 
                     <div class="row mb-2">
                         <div class="col-md-12">

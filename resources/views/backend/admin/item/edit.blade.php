@@ -16,6 +16,9 @@
     <link href="{{ asset('backend/vendor/bootstrap-select/bootstrap-select.min.css') }}" rel="stylesheet" />
 
     <link href="{{ asset('backend/vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet" />
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+
 @endsection
 
 @section('content')
@@ -94,6 +97,7 @@
                                 <form class="float-left pr-1" action="{{ route('admin.items.disapprove', $item) }}" method="POST">
                                     @csrf
                                     @method('PUT')
+                                    <div class="createdAt"></div>
                                     <button type="submit" class="btn btn-sm btn-warning">
                                         <i class="far fa-times-circle"></i>
                                         {{ __('backend.shared.disapprove') }}
@@ -103,6 +107,7 @@
                                 <form class="float-left pr-1" action="{{ route('admin.items.suspend', $item) }}" method="POST">
                                     @csrf
                                     @method('PUT')
+                                    <div class="createdAt"></div>
                                     <button type="submit" class="btn btn-sm btn-danger">
                                         <i class="far fa-flag"></i>
                                         {{ __('backend.shared.suspend') }}
@@ -112,6 +117,7 @@
                                 <form class="float-left pr-1" action="{{ route('admin.items.approve', $item) }}" method="POST">
                                     @csrf
                                     @method('PUT')
+                                    <div class="createdAt"></div>
                                     <button type="submit" class="btn btn-sm btn-success">
                                         <i class="far fa-check-circle"></i>
                                         {{ __('backend.shared.approve') }}
@@ -829,7 +835,7 @@
                                                 @if(empty($item->item_image))
                                                     <img id="image_preview" src="{{ asset('backend/images/placeholder/full_item_feature_image.webp') }}" class="img-responsive">
                                                 @else
-                                                    <img id="image_preview" src="{{ Storage::disk('public')->url('item/'. $item->item_image) }}" class="img-responsive">
+                                                    <img id="image_preview" src="{{ url('storage/item/'. $item->item_image) }}" class="img-responsive">
                                                 @endif
                                                 <input id="feature_image" type="hidden" name="feature_image">
                                             </div>
@@ -1306,6 +1312,23 @@
 
 @section('scripts')
 
+
+<script type="text/javascript">
+
+function set_time() {
+var dateTime = moment().toDate();
+$(".createdAt").html('<input type="hidden" name="createdAt" value="'+dateTime+'"/>');
+call_time();
+}
+
+function call_time(){
+var refresh=1000; // Refresh rate in milli seconds
+mytime=setTimeout('set_time()',refresh)
+}
+
+call_time()
+</script>
+
     @if($site_global_settings->setting_site_map == \App\Setting::SITE_MAP_OPEN_STREET_MAP)
     <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="{{ asset('backend/vendor/leaflet/leaflet.js') }}"></script>
@@ -1316,6 +1339,7 @@
 
     <!-- Bootstrap Fd Plugin Js-->
     <script src="{{ asset('backend/vendor/bootstrap-fd/bootstrap.fd.js') }}"></script>
+    
 
     <!-- searchable selector -->
     <script src="{{ asset('backend/vendor/bootstrap-select/bootstrap-select.min.js') }}"></script>
@@ -1875,3 +1899,4 @@
     @endif
 
 @endsection
+

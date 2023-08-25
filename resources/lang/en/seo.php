@@ -150,5 +150,6 @@ return array (
     'search' => 'Search Listings - :site_name',
     'terms-service' => 'Terms of Service - :site_name',
     'terms-condition' => 'Terms and Condition - :site_name',
+    'faqs' => 'Faqs - :site_name',
   ),
 );

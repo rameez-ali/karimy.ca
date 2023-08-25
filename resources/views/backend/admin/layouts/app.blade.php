@@ -28,6 +28,9 @@
 
     <!-- Custom styles for this template-->
     <link href="{{ asset('backend/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    
+    <!-- cdn of text editor-->
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
 
     <!-- Custom Style File -->
     <link rel="stylesheet" href="{{ asset('backend/css/my-style-admin.css') }}">

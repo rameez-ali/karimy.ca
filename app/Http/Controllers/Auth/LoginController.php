@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Exception;
 use App\Customization;
 use App\Http\Controllers\Controller;
 use App\Plan;
+use Mail;
 use App\Providers\RouteServiceProvider;
 use App\Role;
 use App\Setting;
@@ -13,6 +15,7 @@ use App\SocialLogin;
 use App\Subscription;
 use App\Theme;
 use App\User;
+use App\Device;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -21,6 +24,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\DB;
+use Jenssegers\Agent\Agent;
+use bcrypt;
+use Session;
+use Redirect;
 
 class LoginController extends Controller
 {
@@ -43,19 +51,129 @@ class LoginController extends Controller
      * @var string
      */
     protected $redirectTo = RouteServiceProvider::HOME;
-
+    
+    
+    
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->middleware('guest')->except('logout');
     }
-
-    protected function authenticated($request, $user)
+    
+    /**
+     * Handle a login request to the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+     
+     public function extractDeviceId($userAgent)
+{
+    // Regular expression pattern to match the device ID
+    $pattern = '/\b(?:DeviceID:)\s*(\w+)\b/i';
+    
+    // Perform the pattern match on the user agent
+    preg_match($pattern, $userAgent, $matches);
+    
+    if (isset($matches[1])) {
+        // Extracted device ID
+        $deviceId = $matches[1];
+    } else {
+        // Device ID not found
+        $deviceId = null;
+    }
+    
+    return $deviceId;
+}
+    public function device_authorization_check($request)
     {
+        $device_id = $request->device_id;
+        $user_email = $request->email;
+        $user_id = Auth::user()->id;
+        
+        $device_id_check = Device::where('user_id',Auth::user()->id)->where('device_id',$request->device_id)->value('device_id');
+        
+        if($device_id_check == null){
+
+                $otp = random_int(100000, 999999);
+                
+                DB::table('device_verfication_otp')->insert([
+                    ['user_id' => $user_id,'user_email' => $user_email, 'otp' => $otp],
+                ]);
+                
+                Mail::send('email.device_verification', ['otp' => $otp], function($message) use($request){
+                    $message->to($request->email);
+                    $message->subject('Device Verification Alert');
+                });
+        }
+        
+    }
+    
+    public function login(Request $request)
+    {
+        
+        $this->validateLogin($request);
+        
+        $userAccountStatus = DB::table('users')
+                    ->where('email', $request->email)
+                    ->value('user_suspended');
+                    
+        if($userAccountStatus==1) {
+            return $this->sendBlockedLoginResponse($request);
+        }
+        
+        $remember_me = $request->has('remember') ? true : false; 
+        
+        Session::put('device_id', $request->device_id);
+
+        if(auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password')], $request->remember_me))
+        {
+               //$credentials = $request->getCredentials();
+
+            // if(isset($request->remember) && !empty($request->remember)){
+            //     setCookie("email",$request->email,time()+3600);
+            //     setCookie("password",$request->password,time()+3600);
+            // }
+            
+            
+            $this->device_authorization_check($request);
+            
+            return $this->sendLoginResponse($request);
+            
+        }
+        
+        $hello = User::where('email',$request->email)->where('role_id','!=', 1)->increment('login_attempt');
+    
+        $attemp_no = User::where('email',$request->email)->where('role_id','!=', 1)->value('login_attempt');
+        
+        $account_blocked = User::where('email',$request->email)->where('role_id','!=', 1)->value('user_suspended');
+        
+        if($account_blocked == 1 || $attemp_no == 3)
+        {
+            User::where('email', $request->email)->update(['user_suspended' => 1]);
+            return $this->sendBlockedLoginResponse($request);
+        }
+
+        return $this->sendFailedLoginResponse($request);
+    }
+    
+    
+    
+    public function device_authorization_view($device_token){
+        
+        return view('frontend.authorization', compact('device_token'));
+        
+    }
+    
+    
+    
+    protected function authenticated($request, $user) {
+        
         if ($user->isAdmin())
         {
             $this->redirectTo = route('admin.index');
@@ -75,7 +193,6 @@ class LoginController extends Controller
             $this->redirectTo = route('page.home');
         }
     }
-
     /**
      * Validate the user login request.
      *
@@ -83,8 +200,7 @@ class LoginController extends Controller
      * @return void
      *
      */
-    protected function validateLogin(Request $request)
-    {
+    protected function validateLogin(Request $request) {
         $settings = app('site_global_settings');
 
         if($settings->setting_site_recaptcha_login_enable == Setting::SITE_RECAPTCHA_LOGIN_ENABLE)
@@ -105,9 +221,7 @@ class LoginController extends Controller
             ]);
         }
     }
-
-    public function showLoginForm()
-    {
+    public function showLoginForm() {
         $settings = app('site_global_settings');
 
         /**
@@ -186,9 +300,7 @@ class LoginController extends Controller
                 'site_innerpage_header_background_image', 'site_innerpage_header_background_youtube_video',
                 'site_innerpage_header_title_font_color', 'site_innerpage_header_paragraph_font_color'));
     }
-
-    public function redirectToFacebook()
-    {
+    public function redirectToFacebook() {
         $social_logins = new SocialLogin();
         $social_login_facebook = $social_logins->getFacebookLogin();
         if($social_login_facebook->social_login_enabled == SocialLogin::SOCIAL_LOGIN_ENABLED)
@@ -212,9 +324,7 @@ class LoginController extends Controller
         }
 
     }
-
-    public function handleFacebookCallback()
-    {
+    public function handleFacebookCallback() {
         try {
 
             $social_logins = new SocialLogin();
@@ -253,9 +363,7 @@ class LoginController extends Controller
             return redirect()->route('login');
         }
     }
-
-    public function redirectToGoogle()
-    {
+    public function redirectToGoogle() {
         $social_logins = new SocialLogin();
         $social_login_google = $social_logins->getGoogleLogin();
         if($social_login_google->social_login_enabled == SocialLogin::SOCIAL_LOGIN_ENABLED)
@@ -278,9 +386,7 @@ class LoginController extends Controller
             return back();
         }
     }
-
-    public function handleGoogleCallback()
-    {
+    public function handleGoogleCallback() {
         try {
 
             $social_logins = new SocialLogin();
@@ -319,9 +425,7 @@ class LoginController extends Controller
             return redirect()->route('login');
         }
     }
-
-    public function redirectToTwitter()
-    {
+    public function redirectToTwitter() {
         $social_logins = new SocialLogin();
         $social_login_twitter = $social_logins->getTwitterLogin();
         if($social_login_twitter->social_login_enabled == SocialLogin::SOCIAL_LOGIN_ENABLED)
@@ -344,8 +448,7 @@ class LoginController extends Controller
             return back();
         }
     }
-    public function handleTwitterCallback()
-    {
+    public function handleTwitterCallback() {
         try {
 
             $social_logins = new SocialLogin();
@@ -384,9 +487,7 @@ class LoginController extends Controller
             return redirect()->route('login');
         }
     }
-
-    public function redirectToLinkedIn()
-    {
+    public function redirectToLinkedIn() {
         $social_logins = new SocialLogin();
         $social_login_linkedin = $social_logins->getLinkedInLogin();
         if($social_login_linkedin->social_login_enabled == SocialLogin::SOCIAL_LOGIN_ENABLED)
@@ -408,9 +509,8 @@ class LoginController extends Controller
 
             return back();
         }
-    }
-    public function handleLinkedInCallback()
-    {
+    } 
+    public function handleLinkedInCallback() {
         try {
 
             $social_logins = new SocialLogin();
@@ -449,9 +549,7 @@ class LoginController extends Controller
             return redirect()->route('login');
         }
     }
-
-    public function redirectToGitHub()
-    {
+    public function redirectToGitHub() {
         $social_logins = new SocialLogin();
         $social_login_github = $social_logins->getGitHubLogin();
         if($social_login_github->social_login_enabled == SocialLogin::SOCIAL_LOGIN_ENABLED)
@@ -474,8 +572,7 @@ class LoginController extends Controller
             return back();
         }
     }
-    public function handleGitHubCallback()
-    {
+    public function handleGitHubCallback() {
         try {
 
             $social_logins = new SocialLogin();
@@ -514,9 +611,7 @@ class LoginController extends Controller
             return redirect()->route('login');
         }
     }
-
-    private function createOrGetSocialLoginUser($social_login_user, $social_login_provider)
-    {
+    private function createOrGetSocialLoginUser($social_login_user, $social_login_provider) {
         $social_account = SocialiteAccount::where('socialite_account_provider_name', $social_login_provider)
             ->where('socialite_account_provider_id', $social_login_user->id)
             ->get()

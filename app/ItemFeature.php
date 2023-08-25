@@ -14,8 +14,11 @@ class ItemFeature extends Model
      * @var array
      */
     protected $fillable = [
-        'item_id', 'custom_field_id', 'item_feature_value'
+        'item_id', 'custom_field_id', 'custom_field_name', 'item_feature_value'
     ];
+    
+    
+    
 
     /**
      * Get the custom field that owns the item.

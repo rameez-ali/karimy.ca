@@ -44,7 +44,10 @@
 
                             <div class="col-md-12">
                                 <label class="text-black" for="faqs_answer">{{ __('backend.faq.answer') }}</label>
-                                <textarea rows="6" id="faqs_answer" type="text" class="form-control @error('faqs_answer') is-invalid @enderror" name="faqs_answer">{{ old('faqs_answer') }}</textarea>
+                                <textarea id="faqs_answer" type="text" class="form-control @error('faqs_answer') is-invalid @enderror" name="faqs_answer">{{ old('faqs_answer') }}</textarea>
+                                <script>
+                                        CKEDITOR.replace('faqs_answer');
+                                </script>
                                 @error('faqs_answer')
                                 <span class="invalid-tooltip">
                                         <strong>{{ $message }}</strong>
@@ -82,4 +85,7 @@
 @endsection
 
 @section('scripts')
+<script>
+CKEDITOR.replace('editor1');
+</script>
 @endsection

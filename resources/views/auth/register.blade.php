@@ -52,9 +52,7 @@
 
             <div class="row justify-content-center">
                 <div class="col-md-7 mb-5"  data-aos="fade">
-
-
-
+                    
                     <form method="POST" action="{{ route('register') }}" class="p-5 bg-white">
                         @csrf
 
@@ -64,7 +62,7 @@
                                 <label for="name" class="text-black">{{ __('auth.name') }}</label>
                                 <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
                                 @error('name')
-                                <span class="invalid-feedback" role="alert">
+                                        <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror

@@ -43,10 +43,9 @@ class MessageController extends Controller
         /**
          * End SEO
          */
-
         // All threads that user is participating in
         $threads = Thread::forUser(Auth::user()->id)->latest('updated_at')->get();
-
+        
         // All threads that user is participating in, with new messages
         // $threads = Thread::forUserWithNewMessages(Auth::id())->latest('updated_at')->get();
 
@@ -112,6 +111,7 @@ class MessageController extends Controller
         $message = $request->message;
         $recipient_user_id = $request->recipient;
         $item_id = $request->item;
+        $createdAt = $request->createdAt;
 
         $recipient_user_id_exist = User::find($recipient_user_id);
         if(empty($recipient_user_id_exist))
@@ -147,7 +147,8 @@ class MessageController extends Controller
             'thread_id' => $thread->id,
             'user_id' => Auth::user()->id,
             'body' => $message,
-        ]);
+            'createdAt' => $createdAt,       
+            ]);
 
         // Sender
         Participant::create([
@@ -246,9 +247,10 @@ class MessageController extends Controller
         $request->validate([
             'message' => 'required',
         ]);
-
+        
         $thread = Thread::findOrFail($thread_id);
         $message = $request->message;
+        $createdAt = $request->createdAt;
         $login_user = Auth::user();
 
         if(!$thread->hasParticipant($login_user->id))
@@ -264,6 +266,7 @@ class MessageController extends Controller
             'thread_id' => $thread->id,
             'user_id' => $login_user->id,
             'body' => $message,
+            'createdAt' => $createdAt,
         ]);
 
         // Add replier as a participant

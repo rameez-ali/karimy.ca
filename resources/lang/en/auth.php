@@ -5,6 +5,7 @@ return array (
   'confirm-password-message' => 'Please confirm your password before continuing.',
   'email-addr' => 'E-Mail Address',
   'failed' => 'These credentials do not match our records.',
+  'blocked' => 'You have been blocked for too many attempts. Please contact admin at info@karimy.ca',
   'forgot-password' => 'Forgot Your Password?',
   'have-an-account' => 'Have an account',
   'login' => 'Login',

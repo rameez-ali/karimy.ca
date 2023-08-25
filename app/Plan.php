@@ -41,4 +41,14 @@ class Plan extends Model
     {
         return $this->hasMany('App\Subscription');
     }
+    
+    public function users()
+    {
+        return $this->belongsToMany(
+        User::class,
+        'subscriptions',
+        'plan_id',
+        'user_id');
+    }
+    
 }

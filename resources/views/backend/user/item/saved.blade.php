@@ -57,9 +57,9 @@
                                 <tr>
                                     <td>
                                         @if(!empty($item->item_image_tiny))
-                                            <img src="{{ Storage::disk('public')->url('item/' . $item->item_image_tiny) }}" alt="Image" class="img-fluid rounded">
+                                            <img src="{{ url('storage/item/' . $item->item_image_tiny) }}" alt="Image" class="img-fluid rounded">
                                         @elseif(!empty($item->item_image))
-                                            <img src="{{ Storage::disk('public')->url('item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
+                                            <img src="{{ url('storage/item/' . $item->item_image) }}" alt="Image" class="img-fluid rounded">
                                         @else
                                             <img src="{{ asset('backend/images/placeholder/full_item_feature_image_tiny.webp') }}" alt="Image" class="img-fluid rounded">
                                         @endif

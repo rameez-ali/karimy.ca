@@ -94,11 +94,12 @@
 
                     <form method="POST" action="{{ route('login') }}" class="p-5 bg-white">
                         @csrf
+                        <div id="device_id"></div>
                         <div class="row form-group">
 
                             <div class="col-md-12">
                                 <label class="text-black" for="email">{{ __('auth.email-addr') }}</label>
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" @if(isset($_COOKIE['email'])) value="{{ $_COOKIE['email'] }}" @endif value="{{ old('email') }}" required autocomplete="email" autofocus>
 
                                 @error('email')
                                 <span class="invalid-feedback" role="alert">
@@ -112,7 +113,7 @@
 
                             <div class="col-md-12">
                                 <label class="text-black" for="subject">{{ __('auth.password') }}</label>
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" @if(isset($_COOKIE['password'])) value="{{ $_COOKIE['password'] }}" @endif required autocomplete="current-password">
 
                                 @error('password')
                                 <span class="invalid-feedback" role="alert">
@@ -121,6 +122,8 @@
                                 @enderror
                             </div>
                         </div>
+                        
+
 
                         <div class="form-group row">
                             <div class="col-md-12">
@@ -256,39 +259,29 @@
 
 @section('scripts')
 
-    @if($site_innerpage_header_background_type == \App\Customization::SITE_INNERPAGE_HEADER_BACKGROUND_TYPE_YOUTUBE_VIDEO)
-    <!-- Youtube Background for Header -->
-        <script src="{{ asset('frontend/vendor/jquery-youtube-background/jquery.youtube-background.js') }}"></script>
-    @endif
-    <script>
+<script>
 
-        $(document).ready(function(){
+var rand = function() {
+    return Math.random().toString(36).substr(2); // remove `0.`
+};
 
-            "use strict";
+    function getMacAddress() {
+            if (localStorage.getItem("did")) {
+                var did = localStorage.getItem("did");
+                $('#device_id').html('<input name="device_id" type="hidden" value="'+did+'">');
+                
+            }
+            else{
+                var a = rand() + rand();
+                localStorage.setItem('did', a);
+                var did = localStorage.getItem("did");
+                $('#device_id').html('<input name="device_id" type="hidden" value="'+did+'">');
+            }
+            
+    }
+    
+    getMacAddress();
+</script>
 
-            @if($site_innerpage_header_background_type == \App\Customization::SITE_INNERPAGE_HEADER_BACKGROUND_TYPE_YOUTUBE_VIDEO)
-            /**
-             * Start Initial Youtube Background
-             */
-            $("[data-youtube]").youtube_background();
-            /**
-             * End Initial Youtube Background
-             */
-            @endif
-
-            @if(is_demo_mode())
-            $('#copy-admin-login-button').on('click', function(){
-                $('#email').val("{{ \App\Setting::DEMO_ADMIN_LOGIN_EMAIL }}");
-                $('#password').val("{{ \App\Setting::DEMO_ADMIN_LOGIN_PASSWORD }}");
-            });
-
-            $('#copy-user-login-button').on('click', function(){
-                $('#email').val("{{ \App\Setting::DEMO_USER_LOGIN_EMAIL }}");
-                $('#password').val("{{ \App\Setting::DEMO_USER_LOGIN_PASSWORD }}");
-            });
-            @endif
-        });
-
-    </script>
 
 @endsection

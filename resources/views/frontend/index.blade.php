@@ -239,11 +239,10 @@
         <div class="row">
             <div class="col-12  block-13">
                 <div class="owl-carousel nonloop-block-13">
-
                     @if($paid_items->count() > 0)
                         @foreach($paid_items as $paid_items_key => $item)
                             <div class="d-block d-md-flex listing vertical">
-                                <a href="{{ route('page.item', $item->item_slug) }}" class="img d-block" style="background-image: url({{ !empty($item->item_image_medium) ? Storage::disk('public')->url('item/' . $item->item_image_medium) : (!empty($item->item_image) ? Storage::disk('public')->url('item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }})"></a>
+                                <a href="{{ route('page.item', $item->item_slug) }}" class="img d-block" style="background-image: url({{ !empty($item->item_image_medium) ? Storage::disk('public')->url('item/' . $item->item_image_medium) : (!empty($item->item_image) ? url('storage/item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }})"></a>
                                 <div class="lh-content">
 
                                     @foreach($item->getAllCategories(\App\Item::ITEM_TOTAL_SHOW_CATEGORY_HOMEPAGE) as $item_all_categories_key => $category)
@@ -292,11 +291,7 @@
                                         <div class="col-5 col-md-7 pr-0">
                                             <div class="row align-items-center item-box-user-div">
                                                 <div class="col-3 item-box-user-img-div">
-                                                    @if(empty($item->user->user_image))
-                                                        <img src="{{ asset('frontend/images/placeholder/profile-'. intval($item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
-                                                    @else
-                                                        <img src="{{ Storage::disk('public')->url('user/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
-                                                    @endif
+                                                    
                                                 </div>
                                                 <div class="col-9 line-height-1-2 item-box-user-name-div">
                                                     <div class="row pb-1">
@@ -351,14 +346,14 @@
         </div>
 
         <div class="row">
-
+            
             @if($popular_items->count() > 0)
                 @foreach($popular_items as $popular_items_key => $item)
                     <div class="col-md-6 mb-4 mb-lg-4 col-lg-4">
 
                         <div class="listing-item listing">
                             <div class="listing-image">
-                                <img src="{{ !empty($item->item_image_medium) ? Storage::disk('public')->url('item/' . $item->item_image_medium) : (!empty($item->item_image) ? Storage::disk('public')->url('item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }}" alt="Image" class="img-fluid">
+                                <img src="{{ !empty($item->item_image_medium) ? url('storage/item/' . $item->item_image_medium) : (!empty($item->item_image) ? url('storage/item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }}" alt="Image" class="img-fluid" style="width:350px; height:300px;">
                             </div>
                             <div class="listing-item-content">
 
@@ -409,7 +404,7 @@
                                                 @if(empty($item->user->user_image))
                                                     <img src="{{ asset('frontend/images/placeholder/profile-'. intval($item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
                                                 @else
-                                                    <img src="{{ Storage::disk('public')->url('user/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
+                                                    <img src="{{ url('storage/user/user_image/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
                                                 @endif
                                             </div>
                                             <div class="col-9 line-height-1-2 item-box-user-name-div">
@@ -459,12 +454,12 @@
             </div>
         </div>
         <div class="row mt-5">
-
+        
             @if($latest_items->count() > 0)
                 @foreach($latest_items as $latest_items_key => $item)
                     <div class="col-lg-6">
-                        <div class="d-block d-md-flex listing">
-                            <a href="{{ route('page.item', $item->item_slug) }}" class="img d-block" style="background-image: url({{ !empty($item->item_image_medium) ? Storage::disk('public')->url('item/' . $item->item_image_medium) : (!empty($item->item_image) ? Storage::disk('public')->url('item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }})"></a>
+                        <div class="d-block d-md-flex listing" style="width:540px; height:250px;">
+                            <a href="{{ route('page.item', $item->item_slug) }}" class="img d-block" style="background-image: url({{ !empty($item->item_image_medium) ? url('storage/item/' . $item->item_image_medium) : (!empty($item->item_image) ? url('storage/item/' . $item->item_image) : asset('frontend/images/placeholder/full_item_feature_image_medium.webp')) }})"></a>
                             <div class="lh-content">
 
                                 @foreach($item->getAllCategories(\App\Item::ITEM_TOTAL_SHOW_CATEGORY_HOMEPAGE) as $item_all_categories_key => $category)
@@ -516,7 +511,7 @@
                                                 @if(empty($item->user->user_image))
                                                     <img src="{{ asset('frontend/images/placeholder/profile-'. intval($item->user->id % 10) . '.webp') }}" alt="Image" class="img-fluid rounded-circle">
                                                 @else
-                                                    <img src="{{ Storage::disk('public')->url('user/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
+                                                    <img src="{{ url('storage/user/user_image/' . $item->user->user_image) }}" alt="{{ $item->user->name }}" class="img-fluid rounded-circle">
                                                 @endif
                                             </div>
                                             <div class="col-9 line-height-1-2 item-box-user-name-div">
@@ -643,7 +638,7 @@
                             @if(empty($post->featured_image))
                                 <div class="mb-3" style="min-height:300px;border-radius: 0.25rem;background-image:url({{ asset('frontend/images/placeholder/full_item_feature_image_medium.webp') }});background-size:cover;background-repeat:no-repeat;background-position: center center;"></div>
                             @else
-                                <div class="mb-3" style="min-height:300px;border-radius: 0.25rem;background-image:url({{ url('laravel_project/public' . $post->featured_image) }});background-size:cover;background-repeat:no-repeat;background-position: center center;"></div>
+                                <div class="mb-3" style="min-height:300px;border-radius: 0.25rem;background-image:url({{ url('storage/item' . $post->featured_image) }});background-size:cover;background-repeat:no-repeat;background-position: center center;"></div>
                             @endif
                             <h2 class="font-size-regular"><a href="{{ route('page.blog.show', $post->slug) }}" class="text-black">{{ $post->title }}</a></h2>
                             <div class="meta mb-3">

@@ -323,13 +323,13 @@ class UserController extends Controller
             if(!Storage::disk('public')->exists('user')){
                 Storage::disk('public')->makeDirectory('user');
             }
-            if(Storage::disk('public')->exists('user/' . $user->user_image)){
-                Storage::disk('public')->delete('user/' . $user->user_image);
-            }
+            // if(Storage::disk('public')->exists('user/user_image/' . $user->user_image)){
+            //     Storage::disk('public')->delete('user/user_image/' . $user->user_image);
+            // }
 
             $new_user_image = Image::make(base64_decode(preg_replace('#^data:image/\w+;base64,#i', '',$user_image)))->stream('jpg', 70);
 
-            Storage::disk('public')->put('user/'.$user_image_name, $new_user_image);
+            Storage::disk('public')->put('user/user_image/'.$user_image_name, $new_user_image);
         }
 
         $user->name = $name;
@@ -489,13 +489,13 @@ class UserController extends Controller
                 if(!Storage::disk('public')->exists('user')){
                     Storage::disk('public')->makeDirectory('user');
                 }
-                if(Storage::disk('public')->exists('user/' . $user_admin->user_image)){
-                    Storage::disk('public')->delete('user/' . $user_admin->user_image);
-                }
+                // if(Storage::disk('public')->exists('user/' . $user_admin->user_image)){
+                //     Storage::disk('public')->delete('user/' . $user_admin->user_image);
+                // }
 
                 $new_user_image = Image::make(base64_decode(preg_replace('#^data:image/\w+;base64,#i', '',$user_image)))->stream('jpg', 70);
 
-                Storage::disk('public')->put('user/'.$user_image_name, $new_user_image);
+                Storage::disk('public')->put('user/user_image/'.$user_image_name, $new_user_image);
             }
 
             $user_admin->name = $name;

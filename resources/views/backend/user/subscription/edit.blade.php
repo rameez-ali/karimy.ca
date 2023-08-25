@@ -69,7 +69,14 @@
                                     </h4>
                                 </div>
                                 <div class="card-body">
-                                    <h1 class="card-title pricing-card-title">{{ $site_global_settings->setting_product_currency_symbol . $plan->plan_price }}
+                                    <h3 class="card-title pricing-card-title fs-5">{{ $site_global_settings->setting_product_currency_symbol . $plan->plan_price }}
+                                        
+                                        <small class="text-muted">
+                                           + ${{number_format(($tax_percentage / 100) * $plan->plan_price, 2, '.', '')}} <span style="font-size: 11px; position: relative; top: -10px"> ({{$tax_percentage}} % Tax) </span>
+                                        </small>
+                                        
+                                    </h3>
+                                    <h3
                                         <small class="text-muted">/
                                             @if($plan->plan_period == \App\Plan::PLAN_LIFETIME)
                                                 {{ __('backend.plan.lifetime') }}
@@ -81,8 +88,9 @@
                                                 {{ __('backend.plan.yearly') }}
                                             @endif
                                         </small>
-                                    </h1>
+                                        </h3>
                                     <ul class="list-unstyled mt-3 mb-4">
+                                        
                                         @if(is_null($plan->plan_max_free_listing))
                                             <li>
                                                 {{ __('theme_directory_hub.plan.unlimited') . ' ' . __('theme_directory_hub.plan.free-listing') }}
@@ -256,7 +264,7 @@
                                                 <div class="row form-group justify-content-between">
                                                     <div class="col-12">
                                                         <button type="submit" class="btn btn-sm btn-success btn-block text-white" {{ $subscription->plan->plan_type == \App\Plan::PLAN_TYPE_PAID ? 'disabled' : '' }}>
-                                                            {{ __('payumoney.pay-payumoney') }}
+                                                            {{ __('payumoney.pay-payusssmoney') }}
                                                         </button>
                                                     </div>
                                                 </div>

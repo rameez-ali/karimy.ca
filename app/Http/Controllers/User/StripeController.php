@@ -5,6 +5,9 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Invoice;
 use App\Plan;
+use App\User;
+use App\Tax;
+use DB;
 use App\Setting;
 use App\StripeWebhookLog;
 use App\Subscription;
@@ -17,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Stripe\StripeClient;
 use Stripe\Exception\ApiErrorException;
 
 class StripeController extends Controller
@@ -25,6 +29,13 @@ class StripeController extends Controller
     protected $stripe_secret_key;
     protected $stripe_webhook_signing_secret;
     protected $stripe_currency;
+    
+    private $stripe;
+    public function __construct()
+    {
+        $settings = Setting::first();
+        $this->stripe = new StripeClient($settings->setting_site_stripe_secret_key);
+    }
 
     public function initialStripe()
     {
@@ -79,6 +90,23 @@ class StripeController extends Controller
             $stripe_price_currency = $this->stripe_currency;
             $stripe_interval_count = 1;
             $stripe_product_description = "";
+            
+            $login_user = Auth::user();
+            $user_state_name = User::where('id',$login_user->id)->value('state');
+            $tax = Tax::where('city_name',$user_state_name)->first();
+            
+            if($tax != null){
+                $total_tax = $tax->pst + $tax->gst + $tax->hst;
+                $tax_percentage = number_format($total_tax, 2, '.', '');
+            }
+            else{
+                $tax_percentage = 5;
+            }
+
+            $update_plan_price = $future_plan->plan_price + number_format(($tax_percentage / 100) * $future_plan->plan_price, 2, '.', '');
+            
+            $stripe_price_unit_amount = $update_plan_price * 100;
+            
             if($future_plan->plan_period == Plan::PLAN_MONTHLY)
             {
                 $stripe_product_description = 'Monthly Subscription';
@@ -117,26 +145,10 @@ class StripeController extends Controller
                 'email' => $login_user->email,
             ]);
 
-            // #4 - create a session record in Stripe
-            // $stripe_session = $stripe->checkout->sessions->create([
-            //     'customer' => $stripe_customer['id'],
-            //     'success_url' => route('user.stripe.checkout.success', ['plan_id' => $plan_id, 'subscription_id' => $subscription_id]),
-            //     'cancel_url' => route('user.stripe.checkout.cancel'),
-            //     'payment_method_types' => ['card'],
-            //     'line_items' => [
-            //         [
-            //             'price' => $stripe_price['id'],
-            //             'quantity' => 1,
-            //         ],
-            //     ],
-            //     'mode' => 'subscription',
-            // ]);
-            
-            // edit above code by zeeshan
             
             $stripe_session = $stripe->checkout->sessions->create([
                 'customer' => $stripe_customer['id'],
-                'success_url' => route('user.stripe.checkout.success', ['plan_id' => $plan_id, 'subscription_id' => $subscription_id]),
+                'success_url' => route('user.stripe.checkout.success', ['plan_id' => $plan_id, 'subscription_id' => $subscription_id, 'subscription_stripe_customer_id' => $stripe_customer['id'] ]),
                 'cancel_url' => route('user.stripe.checkout.cancel'),
                 'payment_method_types' => ['card'],
                 'line_items' => [
@@ -146,92 +158,33 @@ class StripeController extends Controller
                     ],
                 ],
                 'mode' => 'subscription',
-                // 'subscription_data' =>[
-                //     'trial_period_days' => 30,
-                //     'description'=>"30 Days Trail",
-                // ],
-                // 'payment_method_collection'=>'always',
             ]);
             
           // edit above code by zeeshan
           
             $stripe_session_id = $stripe_session['id'];
-
-            // #5 - insert the stripe customer_id and future plan_id to the subscription
-            $current_subscription->subscription_stripe_customer_id = $stripe_customer['id'];
-            $current_subscription->subscription_stripe_future_plan_id = $future_plan->id;
-            $current_subscription->subscription_stripe_subscription_id = $stripe_session['subscription'];
-            $current_subscription->subscription_pay_method = Subscription::PAY_METHOD_STRIPE;
-            $current_subscription->save();
-            /*
-            Here we will add email notification to customer about purchasing listing.
-            */
-    // to customer
-    //  $settings = app('site_global_settings');
-    //  if($settings->settings_site_smtp_enabled == Setting::SITE_SMTP_ENABLED)
-    //     {
-    //         // config SMTP
-    //         config_smtp(
-    //             $settings->settings_site_smtp_sender_name,
-    //             $settings->settings_site_smtp_sender_email,
-    //             $settings->settings_site_smtp_host,
-    //             $settings->settings_site_smtp_port,
-    //             $settings->settings_site_smtp_encryption,
-    //             $settings->settings_site_smtp_username,
-    //             $settings->settings_site_smtp_password
-    //         );
-    //     }
-        
-    //     if(!empty($settings->setting_site_name))
-    //     {
-    //         // set up APP_NAME
-    //         config([
-    //             'app.name' => $settings->setting_site_name,
-    //         ]);
-    //     }
-        
-    //     $email_user = $login_user;
-    //     $email_subject = __('email.premium_service.subject');
-        
-    //     $email_notify_message = [
-    //         //__('email.premium_service.body.body-1'),
-    //         "Thank you for signing up with our ".$future_plan->plan_name." subscription",
-    //         __('email.premium_service.body.body-3'),
-    //         "You can now add your business details through the following link:"
-    //     ];
-        
-    //     $routeURL = Auth::user()->hasPaidSubscription() ? route('user.items.create') : route('page.pricing');
-    //      try
-    //     {
-    //         // to user
-    //         Mail::to($email_user)->send(
-    //             new Notification(
-    //                 $email_subject,
-    //                 $email_user->name,
-    //                 null,
-    //                 $email_notify_message,
-    //                 "Create Business Listing Now",
-    //                 "",
-    //                 $routeURL
-    //             )
-    //         );
-
-    //         \Session::flash('flash_message', __('alert.message-send'));
-    //         \Session::flash('flash_type', 'success');
-
-    //     }
-    //     catch (\Exception $e)
-    //     {
-    //         Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
-
-    //         \Session::flash('flash_message', __('theme_directory_hub.email.alert.sending-problem'));
-    //         \Session::flash('flash_type', 'danger');
-    //     }
-        
-        
             
-            /* end
-            */
+            // if($stripe_session['subscription']){
+            //     $subs = $stripe->subscriptions->retrieve(
+            //       $stripe_session['subscription'],
+            //       []
+            //     );
+            //     dd($subs); exit;
+            // $subscription_start_Date = date('Y-m-d H:i:s', $subs->current_period_start);
+            // $subscription_end_Date = date('Y-m-d H:i:s', $subs->current_period_end);
+            
+            // $current_subscription->subscription_stripe_customer_id = $stripe_customer['id'];
+            // $current_subscription->subscription_stripe_subscription_id = $stripe_session['subscription'];
+            // $current_subscription->subscription_start_date = $subscription_start_Date;
+            // $current_subscription->subscription_end_date = $subscription_end_Date;
+            // $current_subscription->subscription_pay_method = Subscription::PAY_METHOD_STRIPE;
+            // $current_subscription->save();
+            // }
+            
+            
+
+            
+            
             return view('backend.user.subscription.payment.stripe.do-checkout',
                 compact('stripe_published_key', 'stripe_session_id'));
 
@@ -247,7 +200,7 @@ class StripeController extends Controller
         }
     }
 
-    public function showCheckoutSuccess(int $plan_id, int $subscription_id)
+    public function showCheckoutSuccess(int $plan_id, int $subscription_id, $subscription_stripe_customer_id )
     {
         $this->initialStripe();
         $login_user = Auth::user();
@@ -325,6 +278,39 @@ class StripeController extends Controller
             /* end
             */
             
+        $all_subscription = $this->stripe->subscriptions->all(['customer' => $subscription_stripe_customer_id]);
+        
+        foreach($all_subscription as $subscription)
+        {
+            // #5 - insert the stripe customer_id, subscription id and updated plan_id to the subscription
+            
+            $subs = $this->stripe->subscriptions->retrieve(
+                  $subscription->id,
+                  []
+                );
+            
+            $subscription_start_Date = date('Y-m-d H:i:s', $subs->current_period_start);
+            $subscription_end_Date = date('Y-m-d H:i:s', $subs->current_period_end);
+            
+            $current_subscription = Subscription::find($subscription_id);
+            $current_subscription->subscription_stripe_customer_id = $subscription_stripe_customer_id;
+            $current_subscription->plan_id = $plan_id;
+            $current_subscription->subscription_start_date = $subscription_start_Date;
+            $current_subscription->subscription_end_date = $subscription_end_Date;
+            $current_subscription->subscription_stripe_subscription_id = $subscription->id;
+            $current_subscription->subscription_pay_method = "Stripe";
+            $current_subscription->save();
+            
+            DB::table('transactions')->insert([
+                                'user_id' => $login_user->id,
+                                'subscription_id' => $subscription->id,
+                                'subscription_name' => $future_plan->plan_name,
+                                'subscription_price' => $future_plan->plan_price,
+                                'invoice_id' => $subscription->latest_invoice,
+                                'payment_method' => $subscription->default_payment_method,
+                                ]);  
+        }
+        
 
         // We will verify the payment in notify function, here just simple redirect to subscription page with a
         // success message.

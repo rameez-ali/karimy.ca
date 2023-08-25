@@ -29,7 +29,8 @@ class ForgotPasswordController extends Controller
 
     public function showLinkRequestForm()
     {
-
+    
+        
         $settings = app('site_global_settings');
 
         /**
@@ -90,6 +91,9 @@ class ForgotPasswordController extends Controller
      */
     public function sendResetLinkEmail(Request $request)
     {
+        // print_r($request);
+        // exit;
+        
         $settings = app('site_global_settings');
 
         /**

@@ -182,7 +182,7 @@
                                         @if(empty($user->user_image))
                                             <img id="image_preview" src="{{ asset('backend/images/placeholder/profile-' . intval($user->id % 10) . '.webp') }}" class="img-responsive">
                                         @else
-                                            <img id="image_preview" src="{{ Storage::disk('public')->url('user/'. $user->user_image) }}" class="img-responsive">
+                                            <img id="image_preview" src="{{ url('storage/user/user_image/'. $user->user_image) }}" class="img-responsive">
                                         @endif
                                         <input id="feature_image" type="hidden" name="user_image">
                                     </div>

@@ -193,7 +193,7 @@ return array (
     'unsave-item-error-exist' => 'You had not saved the business listing.',
     'unsave-item-success' => 'Business listing removed from your saved collection.',
     'website' => 'Website',
-    'item_terms' => 'I Accept the terms and conditions',
+    'item_terms' => 'Please carefully read the "Terms and Conditions" and "Privacy Policy" before continuing to use. If you continue to use our services, you have fully read and accept the " Terms and Conditions" including "Privacy Policy".',
     'authorize_run_canada' =>'Have you been authorized to run a business in Canada?',
     'registered_canada' => 'Is your Business registered in Canada?',
     '18_plus' => 'Are you of legal age i.e., 18+?',
